@@ -17,37 +17,30 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 public class AuthenticationFilter extends OncePerRequestFilter {
 
     private final String authentication;
-    private final String tokenPrefix;
-    private final String authHeader;
     private final CCUserDetailsService userDetailsService;
-    private final JwtHandlers jwtTokenUtil;
+    private final EncryptionHandlers encryptionHandlers;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return !request.getMethod().equalsIgnoreCase("POST") || !request.getRequestURI().equals(authentication);
     }
 
-    public AuthenticationFilter(JwtHandlers jwtTokenUtil, CCUserDetailsService userDetailsService, String tokenPrefix,
-            String authHeader, String authentication) {
+    public AuthenticationFilter(EncryptionHandlers encryptionHandlers, CCUserDetailsService userDetailsService,
+            String authentication) {
         this.userDetailsService = userDetailsService;
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.tokenPrefix = tokenPrefix;
-        this.authHeader = authHeader;
+        this.encryptionHandlers = encryptionHandlers;
         this.authentication = authentication;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // DAO READY
-        final String authorizationHeader = request.getHeader(authHeader);
-        final String ip = request.getRemoteAddr();
+        final String username = encryptionHandlers.hash(request.getRemoteAddr(), encryptionHandlers.getAuthHeader(request));
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername("foo");
+        String jwt = encryptionHandlers.generateToken(userDetails.getUsername());
 
-        String jwt = jwtTokenUtil.generateToken(userDetails.getUsername());
-
-        response.setHeader(authHeader, tokenPrefix + " " + jwt);
+        response.setHeader(encryptionHandlers.getAuthHeader(), encryptionHandlers.getTokenPrefix() + " " + jwt);
 
         UsernamePasswordAuthenticationToken uPassAuthToken = new UsernamePasswordAuthenticationToken(userDetails, null,
                 userDetails.getAuthorities());

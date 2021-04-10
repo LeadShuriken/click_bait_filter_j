@@ -19,10 +19,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 public class AuthenticateJwtFilter extends OncePerRequestFilter {
 
     private final String processing;
-    private final String tokenPrefix;
-    private final String authHeader;
     private final CCUserDetailsService userDetailsService;
-    private final JwtHandlers jwtTokenUtil;
+    private final EncryptionHandlers encryptionHandlers;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -30,12 +28,10 @@ public class AuthenticateJwtFilter extends OncePerRequestFilter {
                 || isAuthenticated();
     }
 
-    public AuthenticateJwtFilter(JwtHandlers jwtTokenUtil, CCUserDetailsService userDetailsService, String tokenPrefix,
-            String authHeader, String processing) {
-        this.jwtTokenUtil = jwtTokenUtil;
+    public AuthenticateJwtFilter(EncryptionHandlers encryptionHandlers, CCUserDetailsService userDetailsService,
+            String processing) {
+        this.encryptionHandlers = encryptionHandlers;
         this.userDetailsService = userDetailsService;
-        this.tokenPrefix = tokenPrefix;
-        this.authHeader = authHeader;
         this.processing = processing;
     }
 
@@ -51,12 +47,11 @@ public class AuthenticateJwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String authorizationHeader = request.getHeader(authHeader);
-        final String jwt = authorizationHeader.substring(tokenPrefix.length() + 1);
-        final String username = jwtTokenUtil.extractUsername(jwt);
-
+        final String jwt = encryptionHandlers.getAuthHeader(request);
+        final String username = encryptionHandlers.extractUsername(jwt);
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-        if (jwtTokenUtil.validateToken(jwt, userDetails)) {
+        
+        if (encryptionHandlers.validateToken(jwt, userDetails)) {
             UsernamePasswordAuthenticationToken uPassAuthToken = new UsernamePasswordAuthenticationToken(userDetails,
                     null, userDetails.getAuthorities());
             uPassAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

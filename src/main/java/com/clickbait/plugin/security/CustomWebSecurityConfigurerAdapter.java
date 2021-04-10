@@ -27,14 +27,8 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
     @Value("${api.endpoints.processing}")
     private String processing;
 
-    @Value("${jwt.tokenPrefix}")
-    private String tokenPrefix;
-
-    @Value("${jwt.authHeader}")
-    private String authHeader;
-
     @Autowired
-    private JwtHandlers jwtTokenUtil;
+    private EncryptionHandlers encryptionHandlers;
 
     @Autowired
     private CCUserDetailsService applicationUserService;
@@ -44,10 +38,11 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         http.httpBasic().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         if (shouldAuthenticate) {
-            http.addFilterBefore(new AuthenticationFilter(jwtTokenUtil, applicationUserService, tokenPrefix, authHeader,
-                    authenticationEndpoint), AbstractPreAuthenticatedProcessingFilter.class)
-                    .addFilterAfter(new AuthenticateJwtFilter(jwtTokenUtil, applicationUserService, tokenPrefix,
-                            authHeader, processing), AbstractPreAuthenticatedProcessingFilter.class)
+            http.addFilterBefore(
+                    new AuthenticationFilter(encryptionHandlers, applicationUserService, authenticationEndpoint),
+                    AbstractPreAuthenticatedProcessingFilter.class)
+                    .addFilterAfter(new AuthenticateJwtFilter(encryptionHandlers, applicationUserService, processing),
+                            AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests().anyRequest().authenticated();
         } else {
             http.authorizeRequests().anyRequest().permitAll();
