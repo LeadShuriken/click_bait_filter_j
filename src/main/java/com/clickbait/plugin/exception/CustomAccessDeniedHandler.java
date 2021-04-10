@@ -28,6 +28,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                     "User: " + auth.getName() + " attempted to access the protected URL: " + request.getRequestURI());
         }
         logger.error(ex.getClass().getName(), ex);
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 }
