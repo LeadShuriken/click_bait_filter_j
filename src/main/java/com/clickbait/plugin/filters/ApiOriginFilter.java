@@ -26,7 +26,7 @@ public class ApiOriginFilter extends ClickBaitPluginFilter {
         if (!Strings.isNullOrEmpty(localOrigin) && localOrigin.startsWith(origin)) {
             filterChain.doFilter(request, response);
         } else {
-            throw new RuntimeException(String.format("%s is no allowed", localOrigin));
+            throw new RuntimeException(String.format("%s from %d is no allowed", localOrigin, request.getRemoteAddr()));
         }
     }
 }

@@ -1,9 +1,12 @@
 package com.clickbait.plugin.security;
 
 import com.clickbait.plugin.CCUserDetailsService;
+import com.clickbait.plugin.exception.CustomAccessDeniedHandler;
+import com.clickbait.plugin.exception.CustomRestExceptionHandler;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 @Configuration
@@ -41,7 +45,7 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         Boolean isProd = activeSpringProfile.equals("prod");
         http.httpBasic().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        if (!isProd && shouldAuthenticate) {
+        if (isProd || shouldAuthenticate) {
             http.addFilterBefore(
                     new AuthenticationFilter(encryptionHandlers, applicationUserService, authenticationEndpoint),
                     AbstractPreAuthenticatedProcessingFilter.class)
@@ -57,27 +61,17 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         }
     }
 
-    // @Override
-    // public void addInterceptors(InterceptorRegistry registry)
-    // {
-    // // registry.addInterceptor(new CustomInterceptor());
-    // }
+    @Bean
+    @Primary
+    public CustomRestExceptionHandler restResponseEntityExceptionHandler() {
+        return new CustomRestExceptionHandler();
+    }
 
-    // @Primary
-    // @Bean
-    // public CustomRestExceptionHandler restResponseEntityExceptionHandler() {
-    // return new CustomRestExceptionHandler();
-    // }
-
-    // @Bean
-    // public AccessDeniedHandler accessDeniedHandler() {
-    // return new CustomAccessDeniedHandler();
-    // }
-
-    // @Bean
-    // public AuthenticationFailureHandler authenticationFailureHandler() {
-    // return new CustomAuthenticationFailureHandler();
-    // }
+    @Bean
+    @Primary
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

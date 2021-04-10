@@ -2,7 +2,7 @@ package com.clickbait.plugin.exception;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+// import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@ControllerAdvice
+// @ControllerAdvice
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
-
+    // Not about to when auth with OncePerRequest Filters
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
