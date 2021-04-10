@@ -18,6 +18,9 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 @EnableWebSecurity
 public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
+    @Value("${spring.profiles.active}")
+    private String activeSpringProfile;
+
     @Value("${authentication}")
     private Boolean shouldAuthenticate;
 
@@ -35,9 +38,10 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
+        Boolean isProd = activeSpringProfile.equals("prod");
         http.httpBasic().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        if (shouldAuthenticate) {
+        if (!isProd && shouldAuthenticate) {
             http.addFilterBefore(
                     new AuthenticationFilter(encryptionHandlers, applicationUserService, authenticationEndpoint),
                     AbstractPreAuthenticatedProcessingFilter.class)
@@ -48,9 +52,9 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
             http.authorizeRequests().anyRequest().permitAll();
         }
 
-        http.csrf() // DEV ONLY
-                .disable() // DEV ONLY
-                .cors().disable();
+        if (!isProd) {
+            http.csrf().disable().cors().disable();
+        }
     }
 
     // @Override
