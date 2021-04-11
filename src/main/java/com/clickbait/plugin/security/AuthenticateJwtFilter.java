@@ -6,9 +6,11 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.clickbait.plugin.dao.CustomUserDetailsService;
+
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.clickbait.plugin.CCUserDetailsService;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,7 +21,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 public class AuthenticateJwtFilter extends OncePerRequestFilter {
 
     private final String processing;
-    private final CCUserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
     private final EncryptionHandlers encryptionHandlers;
 
     @Override
@@ -28,7 +30,7 @@ public class AuthenticateJwtFilter extends OncePerRequestFilter {
                 || isAuthenticated();
     }
 
-    public AuthenticateJwtFilter(EncryptionHandlers encryptionHandlers, CCUserDetailsService userDetailsService,
+    public AuthenticateJwtFilter(EncryptionHandlers encryptionHandlers, CustomUserDetailsService userDetailsService,
             String processing) {
         this.encryptionHandlers = encryptionHandlers;
         this.userDetailsService = userDetailsService;
@@ -50,7 +52,7 @@ public class AuthenticateJwtFilter extends OncePerRequestFilter {
         final String jwt = encryptionHandlers.getAuthHeader(request);
         final String username = encryptionHandlers.extractUsername(jwt);
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-        
+
         if (encryptionHandlers.validateToken(jwt, userDetails)) {
             UsernamePasswordAuthenticationToken uPassAuthToken = new UsernamePasswordAuthenticationToken(userDetails,
                     null, userDetails.getAuthorities());

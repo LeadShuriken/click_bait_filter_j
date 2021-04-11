@@ -7,7 +7,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.clickbait.plugin.CCUserDetailsService;
+import com.clickbait.plugin.dao.CustomUserDetailsService;
+
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +18,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 public class AuthenticationFilter extends OncePerRequestFilter {
 
     private final String authentication;
-    private final CCUserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
     private final EncryptionHandlers encryptionHandlers;
 
     @Override
@@ -25,7 +26,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         return !request.getMethod().equalsIgnoreCase("POST") || !request.getRequestURI().equals(authentication);
     }
 
-    public AuthenticationFilter(EncryptionHandlers encryptionHandlers, CCUserDetailsService userDetailsService,
+    public AuthenticationFilter(EncryptionHandlers encryptionHandlers, CustomUserDetailsService userDetailsService,
             String authentication) {
         this.userDetailsService = userDetailsService;
         this.encryptionHandlers = encryptionHandlers;

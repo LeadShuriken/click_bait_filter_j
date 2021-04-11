@@ -1,12 +1,8 @@
 package com.clickbait.plugin.security;
 
-import com.clickbait.plugin.CCUserDetailsService;
-import com.clickbait.plugin.exception.CustomAccessDeniedHandler;
-import com.clickbait.plugin.exception.CustomRestExceptionHandler;
-
 import org.springframework.context.annotation.Bean;
+import com.clickbait.plugin.dao.CustomUserDetailsService;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,12 +11,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 @Configuration
 @EnableWebSecurity
-public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+public class CustomWebSecurity extends WebSecurityConfigurerAdapter {
 
     @Value("${spring.profiles.active}")
     private String activeSpringProfile;
@@ -38,7 +33,7 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
     private EncryptionHandlers encryptionHandlers;
 
     @Autowired
-    private CCUserDetailsService applicationUserService;
+    private CustomUserDetailsService applicationUserService;
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
@@ -59,18 +54,6 @@ public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAda
         if (!isProd) {
             http.csrf().disable().cors().disable();
         }
-    }
-
-    @Bean
-    @Primary
-    public CustomRestExceptionHandler restResponseEntityExceptionHandler() {
-        return new CustomRestExceptionHandler();
-    }
-
-    @Bean
-    @Primary
-    public AccessDeniedHandler accessDeniedHandler() {
-        return new CustomAccessDeniedHandler();
     }
 
     @Bean
