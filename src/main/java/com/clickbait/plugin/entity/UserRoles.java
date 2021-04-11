@@ -1,32 +1,27 @@
 package com.clickbait.plugin.entity;
 
 import java.util.UUID;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Domain {
+public class UserRoles {
 
     @NotNull
-    @JsonProperty("domainId")
-    private final UUID domainId;
+    @JsonProperty("userId")
+    private final UUID userId;
+
+    @NotNull
+    @JsonProperty("roleId")
+    private final UUID roleId;
 
     @NotBlank
     @JsonProperty("name")
     private final String name;
 
-    public Domain(UUID domainId, String name) {
-        this.domainId = domainId;
+    public UserRoles(UUID userId, UUID roleId, String name) {
+        this.userId = userId;
+        this.roleId = roleId;
         this.name = name;
-    }
-
-    public UUID getDomainId() {
-        return domainId;
-    }
-
-    public String getName() {
-        return name;
     }
 }

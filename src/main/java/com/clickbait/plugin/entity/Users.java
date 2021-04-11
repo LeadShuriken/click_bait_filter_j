@@ -9,16 +9,18 @@ import java.util.UUID;
 public class Users {
 
     @NotNull
+    @JsonProperty("userId")
     private final UUID userId;
 
     @NotBlank
+    @JsonProperty("name")
     private final String name;
 
     @NotBlank
+    @JsonProperty("password")
     private final String password;
 
-    public Users(@JsonProperty("userId") UUID userId, @JsonProperty("name") String name,
-            @JsonProperty("password") String password) {
+    public Users(UUID userId, String name, String password) {
         this.userId = userId;
         this.name = name;
         this.password = password;

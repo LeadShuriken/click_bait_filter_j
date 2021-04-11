@@ -4,20 +4,25 @@ import java.util.UUID;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserTab {
 
     @NotNull
-    private final UUID userId;
-
-    @NotNull
+    @JsonProperty("tabId")
     private final UUID tabId;
 
+    @Min(1)
+    @JsonProperty("index")
+    private final int index;
+
     @NotNull
+    @JsonProperty("domainId")
     private final UUID domainId;
 
-    @Min(1)
-    private final int index;
+    @NotNull
+    @JsonProperty("userId")
+    private final UUID userId;
 
     public UserTab(UUID userId, UUID tabId, UUID domainId, int index) {
         this.userId = userId;
@@ -41,5 +46,4 @@ public class UserTab {
     public int getIndex() {
         return index;
     }
-
 }
