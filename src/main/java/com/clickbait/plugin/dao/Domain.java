@@ -1,4 +1,4 @@
-package com.clickbait.plugin.entity;
+package com.clickbait.plugin.dao;
 
 import java.util.UUID;
 
@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Domain {
 
-    @NotNull
     @JsonProperty("domainId")
     private final UUID domainId;
 

@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS link (
+CREATE TABLE link (
     link_id UUID PRIMARY KEY NOT NULL,
-    link VARCHAR(200) NOT NULL,
+    link VARCHAR(300) NOT NULL,
     count BIGINT CHECK (count >= 1)
 );
 

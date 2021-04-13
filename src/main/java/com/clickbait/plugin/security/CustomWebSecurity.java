@@ -1,7 +1,7 @@
 package com.clickbait.plugin.security;
 
 import org.springframework.context.annotation.Bean;
-import com.clickbait.plugin.dao.CustomUserDetailsService;
+import com.clickbait.plugin.services.CustomUserDetailsService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

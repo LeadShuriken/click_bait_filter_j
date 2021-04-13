@@ -1,4 +1,4 @@
-package com.clickbait.plugin.entity;
+package com.clickbait.plugin.dao;
 
 import java.util.UUID;
 
@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DomainLink {
 
-    @NotNull
     @JsonProperty("linkId")
     private final UUID linkId;
 
@@ -22,7 +21,6 @@ public class DomainLink {
     @JsonProperty("link")
     private final String link;
 
-    @NotNull
     @JsonProperty("domainId")
     private final UUID domainId;
 

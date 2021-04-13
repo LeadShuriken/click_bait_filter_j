@@ -7,7 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.clickbait.plugin.dao.CustomUserDetailsService;
+import com.clickbait.plugin.services.CustomUserDetailsService;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 

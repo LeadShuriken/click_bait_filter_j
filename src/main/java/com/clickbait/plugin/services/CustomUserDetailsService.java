@@ -1,4 +1,4 @@
-package com.clickbait.plugin.dao;
+package com.clickbait.plugin.services;
 
 import java.util.ArrayList;
 

@@ -1,14 +1,12 @@
-package com.clickbait.plugin.entity;
+package com.clickbait.plugin.dao;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+
 import java.util.UUID;
 
 public class Users {
 
-    @NotNull
     @JsonProperty("userId")
     private final UUID userId;
 
@@ -36,5 +34,10 @@ public class Users {
 
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String toString() {
+        return "User{userId=" + userId + ", name=" + name + ", password=" + password + "}";
     }
 }

@@ -1,17 +1,14 @@
-package com.clickbait.plugin.entity;
+package com.clickbait.plugin.dao;
 
 import java.util.UUID;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserRoles {
 
-    @NotNull
     @JsonProperty("userId")
     private final UUID userId;
 
-    @NotNull
     @JsonProperty("roleId")
     private final UUID roleId;
 
