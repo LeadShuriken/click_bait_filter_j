@@ -1,7 +1,9 @@
 package com.clickbait.plugin.services;
 
 import com.clickbait.plugin.dao.*;
+import com.clickbait.plugin.security.Role;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -19,45 +21,48 @@ public class UserAccessService {
                 this.jdbcTemplate = jdbcTemplate;
         }
 
-        List<Users> getAllUsers() {
-                return jdbcTemplate.query("SELECT user_id, name, password FROM users", mapUsersFomDb());
+        List<User> getAllUsers() {
+                return jdbcTemplate.query("SELECT * FROM plugin.get_all_users()", mapUsersFomDb());
         }
 
-        Users getUser(String name, String password) {
-                return jdbcTemplate.queryForObject(
-                                "SELECT user_id, name, password FROM users WHERE name = ? AND password = ?",
-                                mapUsersFomDb(), new Object[] { name, password });
+        User getUser(String name, String password) {
+                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?)", mapUsersFomDb(),
+                                new Object[] { name, password });
         }
 
-        int insertUser(UUID userId, Users user) {
-                return jdbcTemplate.update("INSERT INTO users ( user_id, name, password ) VALUES (?, ?, ?)", userId,
-                                user.getName(), user.getPassword());
+        int insertUser(String name, String password, String role) {
+                return jdbcTemplate.update("CALL plugin.insert_user(?, ?, ?)", name, password, role);
         }
 
-        private RowMapper<Users> mapUsersFomDb() {
+        private RowMapper<User> mapUsersFomDb() {
                 return (resultSet, i) -> {
                         String userIdStr = resultSet.getString("user_id");
                         UUID userId = UUID.fromString(userIdStr);
                         String name = resultSet.getString("name");
                         String password = resultSet.getString("password");
-                        return new Users(userId, name, password);
+                        String role = resultSet.getString("role");
+                        return new User(userId, name, password, Role.valueOf(role));
                 };
         }
 
         boolean isPasswordTaken(String password) {
-                return jdbcTemplate.queryForObject("SELECT EXISTS ( SELECT 1 FROM users WHERE password = ? )",
+                return jdbcTemplate.queryForObject("SELECT EXISTS ( SELECT 1 FROM plugin.users WHERE password = ? )",
                                 (resultSet, i) -> resultSet.getBoolean(1), new Object[] { password });
         }
 
         int deleteUser(UUID userId) {
-                return jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", userId);
+                return jdbcTemplate.update("DELETE FROM plugin.users WHERE user_id = ?", userId);
         }
 
         int updatePassword(UUID userId, String password) {
-                return jdbcTemplate.update("UPDATE users SET password = ? WHERE user_id = ?", password, userId);
+                return jdbcTemplate.update("UPDATE plugin.users SET password = ? WHERE user_id = ?", password, userId);
         }
 
         int updateName(UUID userId, String name) {
-                return jdbcTemplate.update("UPDATE users SET name = ? WHERE user_id = ?", name, userId);
+                return jdbcTemplate.update("UPDATE plugin.users SET name = ? WHERE user_id = ?", name, userId);
+        }
+
+        int updateRole(UUID userId, String role) {
+                return jdbcTemplate.update("UPDATE plugin.role SET name = ? WHERE role_id = ?", role, userId);
         }
 }

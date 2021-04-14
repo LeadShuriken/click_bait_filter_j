@@ -1,11 +1,12 @@
 package com.clickbait.plugin.dao;
 
+import com.clickbait.plugin.security.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.NotBlank;
 
 import java.util.UUID;
 
-public class Users {
+public class User {
 
     @JsonProperty("userId")
     private final UUID userId;
@@ -18,10 +19,15 @@ public class Users {
     @JsonProperty("password")
     private final String password;
 
-    public Users(UUID userId, String name, String password) {
+    @NotBlank
+    @JsonProperty("role")
+    private final Role role;
+
+    public User(UUID userId, String name, String password, Role role) {
         this.userId = userId;
         this.name = name;
         this.password = password;
+        this.role = role;
     }
 
     public UUID getUserId() {
@@ -36,8 +42,12 @@ public class Users {
         return password;
     }
 
+    public String getRole() {
+        return role.getAuthority();
+    }
+
     @Override
     public String toString() {
-        return "User{userId=" + userId + ", name=" + name + ", password=" + password + "}";
+        return "User{userId=" + userId + ", name=" + name + ", password=" + password + ", role=" + role.getAuthority() + "}";
     }
 }

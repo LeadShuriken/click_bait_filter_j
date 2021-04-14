@@ -1,10 +1,10 @@
-CREATE TABLE tab (
-    tab_id UUID PRIMARY KEY NOT NULL,
+CREATE TABLE IF NOT EXISTS plugin.tab (
+    tab_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
     index INTEGER CHECK (index >= 1)
 );
 
-CREATE TABLE user_tab (
-    user_id UUID NOT NULL REFERENCES users (user_id),
-    tab_id UUID NOT NULL REFERENCES tab (tab_id),
-    UNIQUE (user_id, tab_id)
+CREATE TABLE IF NOT EXISTS plugin.user_tab (
+    user_id UUID NOT NULL REFERENCES plugin.users (user_id),
+    tab_id UUID NOT NULL REFERENCES plugin.tab (tab_id),
+    PRIMARY KEY (user_id, tab_id)
 );
