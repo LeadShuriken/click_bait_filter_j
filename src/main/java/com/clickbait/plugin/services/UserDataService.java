@@ -3,7 +3,7 @@ package com.clickbait.plugin.services;
 import com.clickbait.plugin.dao.*;
 import com.clickbait.plugin.security.Role;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public class UserAccessService {
+public class UserDataService {
 
         private final JdbcTemplate jdbcTemplate;
 
         @Autowired
-        public UserAccessService(JdbcTemplate jdbcTemplate) {
+        public UserDataService(JdbcTemplate jdbcTemplate) {
                 this.jdbcTemplate = jdbcTemplate;
         }
 
@@ -26,12 +26,18 @@ public class UserAccessService {
         }
 
         User getUser(String name, String password) {
-                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?)", mapUsersFomDb(),
-                                new Object[] { name, password });
+                try {
+                        return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?)", mapUsersFomDb(),
+                                        new Object[] { name, password });
+                } catch (EmptyResultDataAccessException e) {
+                        return null;
+                }
         }
 
-        int insertUser(String name, String password, String role) {
-                return jdbcTemplate.update("CALL plugin.insert_user(?, ?, ?)", name, password, role);
+        UUID insertUser(String name, String password, String role) {
+                return jdbcTemplate.queryForObject("SELECT * FROM plugin.insert_user(?, ?, ?::plugin.user_role_type)",
+                                (resultSet, i) -> UUID.fromString(resultSet.getString("insert_user")),
+                                new Object[] { name, password, role });
         }
 
         private RowMapper<User> mapUsersFomDb() {
@@ -64,5 +70,10 @@ public class UserAccessService {
 
         int updateRole(UUID userId, String role) {
                 return jdbcTemplate.update("UPDATE plugin.role SET name = ? WHERE role_id = ?", role, userId);
+        }
+
+        int updateUser(UUID userId, String name, String password, String role) {
+                return jdbcTemplate.update("CALL plugin.update_user(?, ?, ?, ?::plugin.user_role_type)", userId, name,
+                                password, role);
         }
 }

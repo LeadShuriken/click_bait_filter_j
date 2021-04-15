@@ -27,4 +27,9 @@ public class Domain {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return "Domain{domainId=" + domainId + ", name=" + name + "}";
+    }
 }

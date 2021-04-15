@@ -7,9 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserTab {
 
-    @JsonProperty("tabId")
-    private final UUID tabId;
-
     @Min(1)
     @JsonProperty("index")
     private final int index;
@@ -20,19 +17,18 @@ public class UserTab {
     @JsonProperty("userId")
     private final UUID userId;
 
-    public UserTab(UUID userId, UUID tabId, UUID domainId, int index) {
+    @JsonProperty("name")
+    private final String name;
+
+    public UserTab(UUID userId, UUID domainId, int index, String name) {
         this.userId = userId;
-        this.tabId = tabId;
         this.domainId = domainId;
         this.index = index;
+        this.name = name;
     }
 
     public UUID getUserId() {
         return userId;
-    }
-
-    public UUID getTabId() {
-        return tabId;
     }
 
     public UUID getDomainId() {
@@ -41,5 +37,14 @@ public class UserTab {
 
     public int getIndex() {
         return index;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "UserTab{index=" + index + ", name=" + name + "}";
     }
 }

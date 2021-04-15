@@ -1,20 +1,8 @@
 CREATE TABLE IF NOT EXISTS plugin.role (
-    role_id UUID PRIMARY KEY NOT NULL,
-    name VARCHAR(5) DEFAULT 'USER' NOT NULL
-    CHECK (
-        name = 'ADMIN' OR
-        name = 'USER'
-    ),
+    role_id plugin.id_type PRIMARY KEY,
+    name plugin.user_role_type DEFAULT 'USER' NOT NULL,
     FOREIGN KEY (role_id) REFERENCES plugin.users (user_id) ON DELETE CASCADE
 );
-
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_with_role') THEN
-        CREATE TYPE plugin.user_with_role AS (user_id UUID, name VARCHAR(100), password VARCHAR(200), role VARCHAR(5));
-    END IF;
-END
-$$;
 
 CREATE OR REPLACE FUNCTION plugin.get_all_users()
 RETURNS SETOF plugin.user_with_role
@@ -27,7 +15,10 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION plugin.get_user(name_p VARCHAR(100), password_p VARCHAR(200))
+CREATE OR REPLACE FUNCTION plugin.get_user(
+    name_p plugin.user_name_type,
+    password_p plugin.user_password_type
+)
 RETURNS SETOF plugin.user_with_role
 LANGUAGE plpgsql
 AS $$
@@ -39,14 +30,34 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE plugin.insert_user(name VARCHAR(100), password VARCHAR(100), role VARCHAR(5))
+CREATE OR REPLACE FUNCTION plugin.insert_user(
+    name_p plugin.user_name_type,
+    password_p plugin.user_password_type,
+    role_p plugin.user_role_type
+)
+RETURNS plugin.id_type
 LANGUAGE plpgsql
 AS $$
-DECLARE
-    DECLARE ident CONSTANT UUID := uuid_generate_v4();
+    DECLARE ident CONSTANT plugin.id_type := uuid_generate_v4();
 BEGIN
-    INSERT INTO plugin.users (user_id, name, password ) VALUES (ident, name, password);
-    INSERT INTO plugin.role ( role_id, name ) VALUES (ident, role);
+    INSERT INTO plugin.users (user_id, name, password ) VALUES (ident, name_p, password_p);
+    INSERT INTO plugin.role (role_id, name) VALUES (ident, role_p);
+    RETURN ident;
+    COMMIT;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE plugin.update_user(
+    user_id_p plugin.id_type,
+    name_p plugin.user_name_type,
+    password_p plugin.user_password_type,
+    role_p plugin.user_role_type
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE plugin.users SET name = name_p, password = password_p WHERE user_id = user_id_p;
+    UPDATE plugin.role SET name = role_p WHERE role_id = user_id_p;
     COMMIT;
 END;
 $$;
