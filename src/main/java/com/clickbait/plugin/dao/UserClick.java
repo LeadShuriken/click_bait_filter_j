@@ -12,24 +12,25 @@ public class UserClick {
     @JsonProperty("userId")
     private final UUID userId;
 
-    @JsonProperty("clickId")
-    private final UUID clickId;
+    @JsonProperty("domain")
+    private final String domain;
 
-    @JsonProperty("domainId")
-    private final UUID domainId;
-
-    @JsonProperty("linkId")
-    private final UUID linkId;
+    @JsonProperty("link")
+    private final String link;
 
     @Past
     @JsonProperty("atTime")
     private final LocalDate atTime;
 
-    public UserClick(UUID userId, UUID clickId, UUID domainId, UUID linkId, LocalDate atTime) {
+    public UserClick(UUID userId, String domain, String link, LocalDate atTime) {
         this.userId = userId;
-        this.clickId = clickId;
-        this.domainId = domainId;
-        this.linkId = linkId;
+        this.domain = domain;
+        this.link = link;
         this.atTime = atTime;
+    }
+
+    @Override
+    public String toString() {
+        return "UserClick{userId=" + userId + ", domain=" + domain + ", link=" + link + ", atTime=" + atTime + "}";
     }
 }

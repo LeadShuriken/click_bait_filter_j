@@ -13,9 +13,12 @@ public class ApiService {
 
     private final UserDataService userAccessService;
     private final TabDataService tabAccessService;
+    private final ClickDataService clickAccessService;
 
     @Autowired
-    public ApiService(UserDataService userAccessService, TabDataService tabAccessService) {
+    public ApiService(UserDataService userAccessService, TabDataService tabAccessService,
+            ClickDataService clickAccessService) {
+        this.clickAccessService = clickAccessService;
         this.userAccessService = userAccessService;
         this.tabAccessService = tabAccessService;
     }
@@ -66,5 +69,13 @@ public class ApiService {
 
     public UUID insertTab(UUID userId, String name, int index) {
         return tabAccessService.insertTab(userId, name, index);
+    }
+
+    public List<UserClick> getAllClicks() {
+        return this.clickAccessService.getAllClicks();
+    }
+
+    public UUID addClick(UUID userId, String domain, String link) {
+        return this.clickAccessService.addClick(userId, domain, link);
     }
 }

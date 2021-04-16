@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS plugin.domain (
     domain_id plugin.id_type DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name plugin.domain_name_type NOT NULL
+    name plugin.domain_name_type UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS plugin.tab (
     user_id plugin.id_type NOT NULL,
     domain_id plugin.id_type NOT NULL,
-    index INTEGER UNIQUE CHECK (index >= 1),
+    index INTEGER CHECK (index >= 1),
     PRIMARY KEY (user_id, domain_id),
     FOREIGN KEY (user_id) REFERENCES plugin.users (user_id) ON DELETE CASCADE,
     FOREIGN KEY (domain_id) REFERENCES plugin.domain (domain_id) ON DELETE CASCADE
@@ -21,8 +21,14 @@ LANGUAGE plpgsql
 AS $$
 DECLARE ident CONSTANT plugin.id_type := uuid_generate_v4();
 BEGIN
-    INSERT INTO plugin.domain (domain_id, name) VALUES (ident, name_p);
-    INSERT INTO plugin.tab (user_id, domain_id, index) VALUES (tad_id, ident, index_p);
+    -- Do this better
+    WITH ROWS AS (
+        INSERT INTO plugin.domain (domain_id, name) VALUES (ident, name_p)
+        ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name
+        RETURNING plugin.domain.domain_id
+    )
+    INSERT INTO plugin.tab (user_id, domain_id, index) 
+    VALUES (tad_id, (SELECT domain_id FROM ROWS), index_p);
     tad_id := ident;
     COMMIT;
 END;
@@ -37,8 +43,6 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 AS $$
-DECLARE 
-  ret RECORD;
 BEGIN
     RETURN QUERY
     SELECT tab.user_id, tab.domain_id, tab.index, domain.name

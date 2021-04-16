@@ -50,6 +50,20 @@ public class ApiControllers {
         System.out.println(apiService.getAllTabs());
         System.out.println(apiService.getUserTab(b.getUserId(), 1));
         System.out.println(apiService.getUserTabs(b.getUserId()));
+
+        // CLICKS
+        UUID c = apiService.addNewUser(new User(null, "b", "passwordBdasda", Role.ADMIN));
+        System.out.println(apiService.insertTab(c, "halabalu", 1));
+        System.out.println(apiService.getAllTabs());
+        System.out.println(apiService.getAllClicks());
+        System.out.println(apiService.addClick(c, "halabalu", "halabalu_first_link"));
+        System.out.println(apiService.getAllClicks());
+        System.out.println(apiService.insertTab(c, "halabalusds", 1));
+        System.out.println(apiService.addClick(c, "halabalusds", "halabalu_first_link"));
+        System.out.println(apiService.addClick(c, "halabalusds", "halabalu_first_link"));
+        System.out.println(apiService.addClick(c, "halabalusds", "halabalu_first_link"));
+        System.out.println(apiService.addClick(c, "halabalusds", "halabalu_first_link"));
+        System.out.println(apiService.getAllClicks());
         return "Hello Page Segmentation!";
     }
 }

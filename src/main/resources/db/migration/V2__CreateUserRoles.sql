@@ -15,21 +15,6 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION plugin.get_user(
-    name_p plugin.user_name_type,
-    password_p plugin.user_password_type
-)
-RETURNS SETOF plugin.user_with_role
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    RETURN QUERY
-    SELECT users.user_id, users.name, users.password, role.name as role
-    FROM plugin.users INNER JOIN plugin.role ON role.role_id = users.user_id
-    WHERE users.name = name_p AND users.password = password_p;
-END;
-$$;
-
 CREATE OR REPLACE FUNCTION plugin.insert_user(
     name_p plugin.user_name_type,
     password_p plugin.user_password_type,
@@ -44,6 +29,21 @@ BEGIN
     INSERT INTO plugin.role (role_id, name) VALUES (ident, role_p);
     RETURN ident;
     COMMIT;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION plugin.get_user(
+    name_p plugin.user_name_type,
+    password_p plugin.user_password_type
+)
+RETURNS SETOF plugin.user_with_role
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT users.user_id, users.name, users.password, role.name as role
+    FROM plugin.users INNER JOIN plugin.role ON role.role_id = users.user_id
+    WHERE users.name = name_p AND users.password = password_p;
 END;
 $$;
 
