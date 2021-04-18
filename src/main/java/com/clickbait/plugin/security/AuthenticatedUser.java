@@ -12,7 +12,8 @@ public class AuthenticatedUser extends User implements UserDetails {
     private final User user;
 
     protected AuthenticatedUser(User user) {
-        super(user.getName(), user.getPassword());
+        super(user.getUserId(), user.getName(), user.getPassword(), user.getRole(), user.getPrivileges(),
+                user.getEnabled(), user.getAccountExpired(), user.getAccountLocked(), user.getCredExpired());
         this.user = user;
     }
 
