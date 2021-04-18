@@ -14,11 +14,25 @@ CREATE TABLE IF NOT EXISTS plugin.privilege (
 CREATE TABLE IF NOT EXISTS plugin.users (
     user_id plugin.id_type DEFAULT plugin.id() PRIMARY KEY,
     name plugin.user_name_type NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
     password plugin.user_password_type NOT NULL,
     role_id plugin.id_type,
     UNIQUE (name, password),
     FOREIGN KEY (role_id) REFERENCES plugin.role (role_id) ON DELETE SET NULL
 );
+
+
+CREATE OR REPLACE PROCEDURE plugin.user_activate(
+    user_id_p plugin.id_type,
+    activate BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE plugin.users SET enabled = activate WHERE user_id = user_id_p;
+    COMMIT;
+END;
+$$;
 
 CREATE TABLE IF NOT EXISTS plugin.user_privilege (
     user_id plugin.id_type NOT NULL,

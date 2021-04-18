@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ApiService {
@@ -93,10 +92,18 @@ public class ApiService {
     }
 
     public List<UserClick> getAllClicks() {
-        return this.clickAccessService.getAllClicks();
+        return clickAccessService.getAllClicks();
     }
 
     public UUID addClick(UUID userId, String domain, String link) {
-        return this.clickAccessService.addClick(userId, domain, link);
+        return clickAccessService.addClick(userId, domain, link);
+    }
+
+    public int activateUser(UUID userId, Boolean activate) {
+        return userAccessService.activateUser(userId, activate);
+    }
+
+    public Boolean isUserActive(UUID userId) {
+        return userAccessService.isUserActive(userId);
     }
 }

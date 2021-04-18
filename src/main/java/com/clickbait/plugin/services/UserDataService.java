@@ -93,4 +93,13 @@ public class UserDataService {
                 return jdbcTemplate.update("CALL plugin.remove_privilege(?, ?::plugin.privilege_type[])", userId,
                                 privileges);
         }
+
+        int activateUser(UUID userId, Boolean activate) {
+                return jdbcTemplate.update("CALL plugin.user_activate(?, ?)", userId, activate);
+        }
+
+        boolean isUserActive(UUID userId) {
+                return jdbcTemplate.queryForObject("SELECT enabled FROM plugin.users WHERE user_id = ?",
+                                (resultSet, i) -> resultSet.getBoolean(1), new Object[] { userId });
+        }
 }

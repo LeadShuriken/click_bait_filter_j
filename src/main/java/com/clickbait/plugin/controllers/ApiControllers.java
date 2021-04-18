@@ -35,6 +35,12 @@ public class ApiControllers {
         System.out.println(apiService.addNewUser(new User("b", "passwordB", ApplicationUserRole.ADMIN)));
         System.out.println(apiService.getAllUsers());
         User a = apiService.getUser("a", "passwordA");
+        System.out.println(apiService.isUserActive(a.getUserId()));
+        System.out.println(apiService.activateUser(a.getUserId(), false));
+        System.out.println(apiService.isUserActive(a.getUserId()));
+        System.out.println(apiService.activateUser(a.getUserId(), true));
+        System.out.println(apiService.isUserActive(a.getUserId()));
+        
         System.out.println(a);
         a = apiService.getUser(a.getUserId());
         System.out.println(a);
