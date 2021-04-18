@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS plugin.link (
 );
 
 CREATE TABLE IF NOT EXISTS plugin.click (
-    click_id plugin.id_type DEFAULT uuid_generate_v4() PRIMARY KEY,
+    click_id plugin.id_type DEFAULT plugin.id() PRIMARY KEY,
     link_id plugin.id_type NOT NULL,
     user_id plugin.id_type NOT NULL,
     at_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION plugin.add_click(
 RETURNS plugin.id_type 
 LANGUAGE plpgsql
 AS $$
-    DECLARE ident CONSTANT plugin.id_type := uuid_generate_v4();
+    DECLARE ident CONSTANT plugin.id_type := plugin.id();
 BEGIN
     WITH ROWS AS (
         INSERT INTO plugin.link ( link_id, link, domain_id ) VALUES (ident, link_p, 

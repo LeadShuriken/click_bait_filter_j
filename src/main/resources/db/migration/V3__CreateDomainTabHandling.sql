@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS plugin.domain (
-    domain_id plugin.id_type DEFAULT uuid_generate_v4() PRIMARY KEY,
+    domain_id plugin.id_type DEFAULT plugin.id() PRIMARY KEY,
     name plugin.domain_name_type UNIQUE NOT NULL
 );
 
@@ -19,9 +19,8 @@ CREATE OR REPLACE PROCEDURE plugin.insert_tab(
 )
 LANGUAGE plpgsql
 AS $$
-DECLARE ident CONSTANT plugin.id_type := uuid_generate_v4();
+DECLARE ident CONSTANT plugin.id_type := plugin.id();
 BEGIN
-    -- Do this better
     WITH ROWS AS (
         INSERT INTO plugin.domain (domain_id, name) VALUES (ident, name_p)
         ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name

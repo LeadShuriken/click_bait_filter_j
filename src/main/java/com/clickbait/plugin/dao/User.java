@@ -1,9 +1,11 @@
 package com.clickbait.plugin.dao;
 
-import com.clickbait.plugin.security.Role;
+import com.clickbait.plugin.security.ApplicationUserRole;
+import com.clickbait.plugin.security.ApplicationUserPrivilege;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.NotBlank;
 
+import java.util.List;
 import java.util.UUID;
 
 public class User {
@@ -21,12 +23,50 @@ public class User {
 
     @NotBlank
     @JsonProperty("role")
-    private final Role role;
+    private final ApplicationUserRole role;
 
-    public User(UUID userId, String name, String password, Role role) {
+    @NotBlank
+    @JsonProperty("privileges")
+    private final List<ApplicationUserPrivilege> privileges;
+
+    public User(UUID userId) {
+        this.userId = userId;
+        this.name = null;
+        this.password = null;
+        this.privileges = null;
+        this.role = null;
+    }
+
+    public User(String name, String password) {
+        this.userId = null;
+        this.name = name;
+        this.password = password;
+        this.privileges = null;
+        this.role = null;
+    }
+
+    public User(String name, String password, ApplicationUserRole role) {
+        this.userId = null;
+        this.name = name;
+        this.password = password;
+        this.privileges = null;
+        this.role = role;
+    }
+
+    public User(String name, String password, ApplicationUserRole role, List<ApplicationUserPrivilege> privileges) {
+        this.userId = null;
+        this.name = name;
+        this.password = password;
+        this.privileges = privileges;
+        this.role = role;
+    }
+
+    public User(UUID userId, String name, String password, ApplicationUserRole role,
+            List<ApplicationUserPrivilege> privileges) {
         this.userId = userId;
         this.name = name;
         this.password = password;
+        this.privileges = privileges;
         this.role = role;
     }
 
@@ -38,16 +78,21 @@ public class User {
         return name;
     }
 
+    public List<ApplicationUserPrivilege> getPrivileges() {
+        return privileges;
+    }
+
     public String getPassword() {
         return password;
     }
 
     public String getRole() {
-        return role.getAuthority();
+        return role != null ? role.getAuthority() : null;
     }
 
     @Override
     public String toString() {
-        return "User{name=" + name + ", password=" + password + ", role=" + role.getAuthority() + "}";
+        return "User{name=" + name + ", password=" + password + ", role=" + role.getAuthority() + ", privileges="
+                + privileges + "}";
     }
 }

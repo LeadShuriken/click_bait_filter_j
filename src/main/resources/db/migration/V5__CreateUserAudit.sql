@@ -36,7 +36,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Triggers Remain in plugin 
 CREATE TRIGGER set_create_trigger
 AFTER INSERT ON plugin.users
 FOR EACH ROW

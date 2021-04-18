@@ -8,27 +8,44 @@ DO $$ BEGIN
     CREATE DOMAIN plugin.domain_name_type VARCHAR(100);
     CREATE DOMAIN plugin.user_password_type VARCHAR(200);
     CREATE TYPE plugin.user_role_type AS ENUM ('ADMIN', 'USER');
-    CREATE TYPE plugin.user_privilege_type AS ENUM (
+    CREATE TYPE plugin.privilege_type AS ENUM (
         'USERS_READ',
         'USERS_WRITE',
         'CLICKS_READ',
         'CLICKS_WRITE',
         'DOMAINS_READ',
-        'DOMAINS_WRITE',
-        'FROM_ROLE'
+        'DOMAINS_WRITE'
     );
-    CREATE TYPE plugin.user_with_role AS (
+    CREATE TYPE plugin.user_privileges AS ENUM (
+        'USERS_WRITE',
+        'CLICKS_WRITE',
+        'DOMAINS_READ',
+        'DOMAINS_WRITE'
+    );
+    CREATE TYPE plugin.admin_privileges AS ENUM (
+        'USERS_READ',
+        'USERS_WRITE',
+        'CLICKS_READ',
+        'CLICKS_WRITE',
+        'DOMAINS_READ',
+        'DOMAINS_WRITE'
+    );
+    CREATE TYPE plugin.users_response AS (
         user_id plugin.id_type,
         name plugin.user_name_type,
         password plugin.user_password_type,
-        role plugin.user_role_type
+        role plugin.user_role_type,
+        privileges TEXT[]
     );
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
-CREATE TABLE IF NOT EXISTS plugin.users (
-    user_id plugin.id_type DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name plugin.user_name_type NOT NULL,
-    password plugin.user_password_type NOT NULL UNIQUE
-);
+CREATE OR REPLACE FUNCTION plugin.id()
+RETURNS plugin.id_type
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN uuid_generate_v4();
+END;
+$$;

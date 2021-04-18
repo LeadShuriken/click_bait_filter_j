@@ -1,12 +1,15 @@
 package com.clickbait.plugin.services;
 
 import com.clickbait.plugin.dao.*;
+import com.clickbait.plugin.security.ApplicationUserPrivilege;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ApiService {
@@ -27,8 +30,12 @@ public class ApiService {
         return userAccessService.getAllUsers();
     }
 
+    public User getUser(UUID id) {
+        return userAccessService.getUser(id, null, null);
+    }
+
     public User getUser(String name, String password) {
-        return userAccessService.getUser(name, password);
+        return userAccessService.getUser(null, name, password);
     }
 
     public UUID addNewUser(User user) {
@@ -52,7 +59,21 @@ public class ApiService {
             }
         });
 
-        return userAccessService.updateUser(userId, user.getName(), user.getPassword(), user.getRole());
+        String[] priv = null;
+        if (user.getPrivileges() != null) {
+            priv = user.getPrivileges().stream().map(ApplicationUserPrivilege::getPrivilege).toArray(String[]::new);
+        }
+        return userAccessService.updateUser(userId, user.getName(), user.getPassword(), user.getRole(), priv);
+    }
+
+    public int addPrivilige(UUID userId, List<ApplicationUserPrivilege> privileges) {
+        return userAccessService.addPrivilige(userId,
+                privileges.stream().map(ApplicationUserPrivilege::getPrivilege).toArray(String[]::new));
+    }
+
+    public int removePrivilige(UUID userId, List<ApplicationUserPrivilege> privileges) {
+        return userAccessService.removePrivilige(userId,
+                privileges.stream().map(ApplicationUserPrivilege::getPrivilege).toArray(String[]::new));
     }
 
     public List<UserTab> getAllTabs() {

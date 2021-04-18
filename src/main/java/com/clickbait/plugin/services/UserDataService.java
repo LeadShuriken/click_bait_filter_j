@@ -1,15 +1,18 @@
 package com.clickbait.plugin.services;
 
 import com.clickbait.plugin.dao.*;
-import com.clickbait.plugin.security.Role;
+import com.clickbait.plugin.security.ApplicationUserPrivilege;
+import com.clickbait.plugin.security.ApplicationUserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class UserDataService {
@@ -25,10 +28,10 @@ public class UserDataService {
                 return jdbcTemplate.query("SELECT * FROM plugin.get_all_users()", mapUsersFomDb());
         }
 
-        User getUser(String name, String password) {
+        User getUser(UUID id, String name, String password) {
                 try {
-                        return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?)", mapUsersFomDb(),
-                                        new Object[] { name, password });
+                        return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?, ?)", mapUsersFomDb(),
+                                        new Object[] { id, name, password });
                 } catch (EmptyResultDataAccessException e) {
                         return null;
                 }
@@ -47,7 +50,10 @@ public class UserDataService {
                         String name = resultSet.getString("name");
                         String password = resultSet.getString("password");
                         String role = resultSet.getString("role");
-                        return new User(userId, name, password, Role.valueOf(role));
+                        List<ApplicationUserPrivilege> privileges = Arrays
+                                        .stream((String[]) resultSet.getArray("privileges").getArray())
+                                        .map(ApplicationUserPrivilege::valueOf).collect(Collectors.toList());
+                        return new User(userId, name, password, ApplicationUserRole.valueOf(role), privileges);
                 };
         }
 
@@ -72,8 +78,19 @@ public class UserDataService {
                 return jdbcTemplate.update("UPDATE plugin.role SET name = ? WHERE role_id = ?", role, userId);
         }
 
-        int updateUser(UUID userId, String name, String password, String role) {
-                return jdbcTemplate.update("CALL plugin.update_user(?, ?, ?, ?::plugin.user_role_type)", userId, name,
-                                password, role);
+        int updateUser(UUID userId, String name, String password, String role, String[] privileges) {
+                return jdbcTemplate.update(
+                                "CALL plugin.update_user(?, ?, ?, ?::plugin.user_role_type, ?::plugin.privilege_type[])",
+                                userId, name, password, role, privileges);
+        }
+
+        int addPrivilige(UUID userId, String[] privileges) {
+                return jdbcTemplate.update("CALL plugin.add_privilege(?, ?::plugin.privilege_type[])", userId,
+                                privileges);
+        }
+
+        int removePrivilige(UUID userId, String[] privileges) {
+                return jdbcTemplate.update("CALL plugin.remove_privilege(?, ?::plugin.privilege_type[])", userId,
+                                privileges);
         }
 }
