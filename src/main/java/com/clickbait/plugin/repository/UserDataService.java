@@ -1,4 +1,4 @@
-package com.clickbait.plugin.services;
+package com.clickbait.plugin.repository;
 
 import com.clickbait.plugin.dao.*;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
@@ -50,10 +50,15 @@ public class UserDataService {
                         String name = resultSet.getString("name");
                         String password = resultSet.getString("password");
                         String role = resultSet.getString("role");
+                        Boolean enabled = resultSet.getBoolean("enabled");
+                        Boolean accountExpired = resultSet.getBoolean("account_expired");
+                        Boolean accountLocked = resultSet.getBoolean("account_locked");
+                        Boolean credExpired = resultSet.getBoolean("cred_expired");
                         List<ApplicationUserPrivilege> privileges = Arrays
                                         .stream((String[]) resultSet.getArray("privileges").getArray())
                                         .map(ApplicationUserPrivilege::valueOf).collect(Collectors.toList());
-                        return new User(userId, name, password, ApplicationUserRole.valueOf(role), privileges);
+                        return new User(userId, name, password, ApplicationUserRole.valueOf(role), privileges, enabled,
+                                        accountExpired, accountLocked, credExpired);
                 };
         }
 
@@ -94,8 +99,10 @@ public class UserDataService {
                                 privileges);
         }
 
-        int activateUser(UUID userId, Boolean activate) {
-                return jdbcTemplate.update("CALL plugin.user_activate(?, ?)", userId, activate);
+        int activateUser(UUID userId, Boolean enabled, Boolean accountExpired, Boolean accountLocked,
+                        Boolean credExpired) {
+                return jdbcTemplate.update("CALL plugin.user_authentication(?, ?, ?, ?)", userId, enabled,
+                                accountExpired, accountLocked, credExpired);
         }
 
         boolean isUserActive(UUID userId) {

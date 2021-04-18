@@ -35,6 +35,10 @@ DO $$ BEGIN
         name plugin.user_name_type,
         password plugin.user_password_type,
         role plugin.user_role_type,
+        enabled BOOLEAN,          
+        account_expired BOOLEAN,  
+        account_locked BOOLEAN,   
+        cred_expired BOOLEAN,    
         privileges TEXT[]
     );
 EXCEPTION

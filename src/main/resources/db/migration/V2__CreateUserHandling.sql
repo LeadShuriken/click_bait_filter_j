@@ -14,7 +14,10 @@ CREATE TABLE IF NOT EXISTS plugin.privilege (
 CREATE TABLE IF NOT EXISTS plugin.users (
     user_id plugin.id_type DEFAULT plugin.id() PRIMARY KEY,
     name plugin.user_name_type NOT NULL,
-    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,           -- sohead
+    account_expired BOOLEAN NOT NULL DEFAULT FALSE,  -- sohead
+    account_locked BOOLEAN NOT NULL DEFAULT FALSE,   -- sohead
+    cred_expired BOOLEAN NOT NULL DEFAULT FALSE,     -- sohead
     password plugin.user_password_type NOT NULL,
     role_id plugin.id_type,
     UNIQUE (name, password),
@@ -22,14 +25,22 @@ CREATE TABLE IF NOT EXISTS plugin.users (
 );
 
 
-CREATE OR REPLACE PROCEDURE plugin.user_activate(
+CREATE OR REPLACE PROCEDURE plugin.user_authentication(
     user_id_p plugin.id_type,
-    activate BOOLEAN
+    enabled_p BOOLEAN,
+    account_expired_p BOOLEAN,
+    account_locked_p BOOLEAN,
+    cred_expired_p BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    UPDATE plugin.users SET enabled = activate WHERE user_id = user_id_p;
+    UPDATE plugin.users SET 
+        enabled = COALESCE(enabled_p, users.enabled), 
+        account_expired = COALESCE(account_expired_p, users.account_expired),  
+        account_locked = COALESCE(account_locked_p, users.account_locked),   
+        cred_expired = COALESCE(cred_expired_p, users.cred_expired) 
+    WHERE user_id = user_id_p;
     COMMIT;
 END;
 $$;
@@ -79,7 +90,11 @@ BEGIN
     SELECT 
         users.user_id, users.name,
         users.password, role.name as role,
-        ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges
+        ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges,
+        users.enabled,
+        users.account_expired,
+        users.account_locked,
+        users.cred_expired
     FROM plugin.users 
     INNER JOIN plugin.role USING (role_id)
     LEFT JOIN plugin.user_privilege USING (user_id)
@@ -101,7 +116,11 @@ BEGIN
     SELECT 
         users.user_id, users.name,
         users.password, role.name as role,
-        ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges
+        ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges,
+        users.enabled,
+        users.account_expired,
+        users.account_locked,
+        users.cred_expired
     FROM plugin.users 
     INNER JOIN plugin.role USING (role_id)
     LEFT JOIN plugin.user_privilege USING (user_id)

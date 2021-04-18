@@ -3,9 +3,9 @@ package com.clickbait.plugin.controllers;
 import java.util.Arrays;
 import java.util.UUID;
 import com.clickbait.plugin.dao.User;
+import com.clickbait.plugin.repository.DatabaseApiService;
 import com.clickbait.plugin.security.ApplicationUserRole;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
-import com.clickbait.plugin.services.ApiService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/${api.version}")
 public class ApiControllers {
-    private final ApiService apiService;
+
+    private final DatabaseApiService apiService;
 
     @Autowired
-    public ApiControllers(ApiService userService) {
+    public ApiControllers(DatabaseApiService userService) {
         this.apiService = userService;
     }
 
@@ -35,12 +36,15 @@ public class ApiControllers {
         System.out.println(apiService.addNewUser(new User("b", "passwordB", ApplicationUserRole.ADMIN)));
         System.out.println(apiService.getAllUsers());
         User a = apiService.getUser("a", "passwordA");
+
         System.out.println(apiService.isUserActive(a.getUserId()));
-        System.out.println(apiService.activateUser(a.getUserId(), false));
+        System.out.println(apiService.activateUser(a.getUserId(), true, false, true, false));
+        System.out.println(apiService.getUser(a.getUserId()));
         System.out.println(apiService.isUserActive(a.getUserId()));
-        System.out.println(apiService.activateUser(a.getUserId(), true));
+        System.out.println(apiService.activateUser(a.getUserId(), false, true, false, true));
+        System.out.println(apiService.getUser(a.getUserId()));
         System.out.println(apiService.isUserActive(a.getUserId()));
-        
+
         System.out.println(a);
         a = apiService.getUser(a.getUserId());
         System.out.println(a);

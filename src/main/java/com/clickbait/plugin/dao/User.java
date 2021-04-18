@@ -29,12 +29,32 @@ public class User {
     @JsonProperty("privileges")
     private final List<ApplicationUserPrivilege> privileges;
 
+    @NotBlank
+    @JsonProperty("enabled")
+    private final Boolean enabled;
+
+    @NotBlank
+    @JsonProperty("accountExpired")
+    private final Boolean accountExpired;
+
+    @NotBlank
+    @JsonProperty("accountLocked")
+    private final Boolean accountLocked;
+
+    @NotBlank
+    @JsonProperty("credExpired")
+    private final Boolean credExpired;
+
     public User(UUID userId) {
         this.userId = userId;
         this.name = null;
         this.password = null;
         this.privileges = null;
         this.role = null;
+        this.enabled = null;
+        this.accountExpired = null;
+        this.accountLocked = null;
+        this.credExpired = null;
     }
 
     public User(String name, String password) {
@@ -43,6 +63,10 @@ public class User {
         this.password = password;
         this.privileges = null;
         this.role = null;
+        this.enabled = null;
+        this.accountExpired = null;
+        this.accountLocked = null;
+        this.credExpired = null;
     }
 
     public User(String name, String password, ApplicationUserRole role) {
@@ -51,6 +75,10 @@ public class User {
         this.password = password;
         this.privileges = null;
         this.role = role;
+        this.enabled = null;
+        this.accountExpired = null;
+        this.accountLocked = null;
+        this.credExpired = null;
     }
 
     public User(String name, String password, ApplicationUserRole role, List<ApplicationUserPrivilege> privileges) {
@@ -59,15 +87,40 @@ public class User {
         this.password = password;
         this.privileges = privileges;
         this.role = role;
+        this.enabled = null;
+        this.accountExpired = null;
+        this.accountLocked = null;
+        this.credExpired = null;
     }
 
     public User(UUID userId, String name, String password, ApplicationUserRole role,
-            List<ApplicationUserPrivilege> privileges) {
+            List<ApplicationUserPrivilege> privileges, Boolean enabled, Boolean accountExpired, Boolean accountLocked,
+            Boolean credExpired) {
         this.userId = userId;
         this.name = name;
         this.password = password;
         this.privileges = privileges;
         this.role = role;
+        this.enabled = enabled;
+        this.accountExpired = accountExpired;
+        this.accountLocked = accountLocked;
+        this.credExpired = credExpired;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public Boolean getAccountExpired() {
+        return accountExpired;
+    }
+
+    public Boolean getAccountLocked() {
+        return accountLocked;
+    }
+
+    public Boolean getCredExpired() {
+        return credExpired;
     }
 
     public UUID getUserId() {
@@ -86,13 +139,13 @@ public class User {
         return password;
     }
 
-    public String getRole() {
-        return role != null ? role.getAuthority() : null;
+    public ApplicationUserRole getRole() {
+        return role;
     }
 
     @Override
     public String toString() {
-        return "User{name=" + name + ", password=" + password + ", role=" + role.getAuthority() + ", privileges="
+        return "User{name=" + name + ", password=" + password + ", role=" + getRole().name() + ", privileges="
                 + privileges + "}";
     }
 }

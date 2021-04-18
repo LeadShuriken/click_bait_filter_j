@@ -51,6 +51,7 @@ public class AuthenticateJwtFilter extends OncePerRequestFilter {
 
         final String jwt = encryptionHandlers.getAuthHeader(request);
         final String username = encryptionHandlers.extractUsername(jwt);
+        
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
         if (encryptionHandlers.validateToken(jwt, userDetails)) {

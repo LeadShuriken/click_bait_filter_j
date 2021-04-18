@@ -1,4 +1,4 @@
-package com.clickbait.plugin.services;
+package com.clickbait.plugin.repository;
 
 import com.clickbait.plugin.dao.*;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
@@ -11,14 +11,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class ApiService {
+public class DatabaseApiService {
 
     private final UserDataService userAccessService;
     private final TabDataService tabAccessService;
     private final ClickDataService clickAccessService;
 
     @Autowired
-    public ApiService(UserDataService userAccessService, TabDataService tabAccessService,
+    public DatabaseApiService(UserDataService userAccessService, TabDataService tabAccessService,
             ClickDataService clickAccessService) {
         this.clickAccessService = clickAccessService;
         this.userAccessService = userAccessService;
@@ -41,7 +41,7 @@ public class ApiService {
         if (userAccessService.isPasswordTaken(user.getPassword())) {
             return null;
         }
-        return userAccessService.insertUser(user.getName(), user.getPassword(), user.getRole());
+        return userAccessService.insertUser(user.getName(), user.getPassword(), user.getRole().name());
     }
 
     public int deleteUser(UUID userId) {
@@ -62,7 +62,7 @@ public class ApiService {
         if (user.getPrivileges() != null) {
             priv = user.getPrivileges().stream().map(ApplicationUserPrivilege::getPrivilege).toArray(String[]::new);
         }
-        return userAccessService.updateUser(userId, user.getName(), user.getPassword(), user.getRole(), priv);
+        return userAccessService.updateUser(userId, user.getName(), user.getPassword(), user.getRole().name(), priv);
     }
 
     public int addPrivilige(UUID userId, List<ApplicationUserPrivilege> privileges) {
@@ -99,8 +99,9 @@ public class ApiService {
         return clickAccessService.addClick(userId, domain, link);
     }
 
-    public int activateUser(UUID userId, Boolean activate) {
-        return userAccessService.activateUser(userId, activate);
+    public int activateUser(UUID userId, Boolean enabled, Boolean accountExpired, Boolean accountLocked,
+            Boolean credExpired) {
+        return userAccessService.activateUser(userId, enabled, accountExpired, accountLocked, credExpired);
     }
 
     public Boolean isUserActive(UUID userId) {

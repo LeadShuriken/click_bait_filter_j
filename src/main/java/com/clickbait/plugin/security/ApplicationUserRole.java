@@ -2,12 +2,14 @@ package com.clickbait.plugin.security;
 
 import com.google.common.collect.Sets;
 
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import static com.clickbait.plugin.security.ApplicationUserPrivilege.*;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public enum ApplicationUserRole implements GrantedAuthority {
+public enum ApplicationUserRole {
     USER(Sets.newHashSet(
         USERS_WRITE,
         CLICKS_WRITE,
@@ -33,8 +35,10 @@ public enum ApplicationUserRole implements GrantedAuthority {
         return privileges;
     }
 
-    @Override
-    public String getAuthority() {
-        return name();
+    public Set<SimpleGrantedAuthority> getGrantedAuthorities() {
+        Set<SimpleGrantedAuthority> permissions = getPrivileges().stream()
+                .map(permission -> new SimpleGrantedAuthority(permission.getPrivilege())).collect(Collectors.toSet());
+        permissions.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
+        return permissions;
     }
 }

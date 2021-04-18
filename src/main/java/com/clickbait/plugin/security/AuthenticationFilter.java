@@ -36,7 +36,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // final String username = encryptionHandlers.hash(request.getRemoteAddr(), encryptionHandlers.getAuthHeader(request));
+        // final String username = encryptionHandlers.hash(request.getRemoteAddr(),
+        // encryptionHandlers.getAuthHeader(request));
         final UserDetails userDetails = userDetailsService.loadUserByUsername("foo");
 
         String jwt = encryptionHandlers.generateToken(userDetails.getUsername());
