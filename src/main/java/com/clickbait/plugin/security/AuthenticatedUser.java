@@ -7,13 +7,11 @@ import java.util.Collection;
 
 import com.clickbait.plugin.dao.User;
 
-public class AuthenticatedUser extends User implements UserDetails {
+public class AuthenticatedUser implements UserDetails {
 
     private final User user;
 
     protected AuthenticatedUser(User user) {
-        super(user.getUserId(), user.getName(), user.getPassword(), user.getRole(), user.getPrivileges(),
-                user.getEnabled(), user.getAccountExpired(), user.getAccountLocked(), user.getCredExpired());
         this.user = user;
     }
 
@@ -45,5 +43,10 @@ public class AuthenticatedUser extends User implements UserDetails {
     @Override
     public String getUsername() {
         return user.getName();
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPassword();
     }
 }
