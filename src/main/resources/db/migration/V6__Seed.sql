@@ -1,7 +1,4 @@
-CREATE OR REPLACE FUNCTION plugin.seed_roles()
-RETURNS void
-LANGUAGE plpgsql
-AS $$
+DO $$
 DECLARE
     ident plugin.id_type;
     priv plugin.privilege_type;
@@ -16,7 +13,4 @@ BEGIN
             INSERT INTO plugin.privilege (name, role_id) VALUES (priv, ident);
         END LOOP;
     END LOOP;
-END;
-$$;
-
-SELECT plugin.seed_roles();
+END $$;
