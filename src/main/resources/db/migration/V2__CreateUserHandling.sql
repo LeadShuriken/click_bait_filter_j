@@ -127,6 +127,7 @@ BEGIN
     LEFT JOIN plugin.privilege USING (privilege_id)
     WHERE users.user_id = user_id_p OR 
     (users.name = name_p AND users.password = password_p) 
+    OR users.name = name_p
     GROUP BY users.user_id, users.name, role.name;
 END;
 $$;

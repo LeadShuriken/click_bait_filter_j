@@ -2,6 +2,7 @@ package com.clickbait.plugin.repository;
 
 import com.clickbait.plugin.dao.*;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
+import com.clickbait.plugin.security.ApplicationUserRole;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,14 +12,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class DatabaseApiService {
+public class ApplicationDao {
 
     private final UserDataService userAccessService;
     private final TabDataService tabAccessService;
     private final ClickDataService clickAccessService;
 
     @Autowired
-    public DatabaseApiService(UserDataService userAccessService, TabDataService tabAccessService,
+    public ApplicationDao(UserDataService userAccessService, TabDataService tabAccessService,
             ClickDataService clickAccessService) {
         this.clickAccessService = clickAccessService;
         this.userAccessService = userAccessService;
@@ -33,15 +34,19 @@ public class DatabaseApiService {
         return userAccessService.getUser(id, null, null);
     }
 
+    public User getUser(String name) {
+        return userAccessService.getUser(null, name, null);
+    }
+
     public User getUser(String name, String password) {
         return userAccessService.getUser(null, name, password);
     }
 
-    public UUID addNewUser(User user) {
-        if (userAccessService.isPasswordTaken(user.getPassword())) {
+    public UUID addNewUser(String name, String password, ApplicationUserRole role) {
+        if (userAccessService.isPasswordTaken(password)) {
             return null;
         }
-        return userAccessService.insertUser(user.getName(), user.getPassword(), user.getRole().name());
+        return userAccessService.insertUser(name, password, role.name());
     }
 
     public int deleteUser(UUID userId) {

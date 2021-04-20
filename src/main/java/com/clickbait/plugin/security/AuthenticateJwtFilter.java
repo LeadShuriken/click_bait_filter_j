@@ -4,12 +4,15 @@ import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import com.google.common.base.Strings;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.clickbait.plugin.services.CustomUserDetailsService;
+import com.clickbait.plugin.services.ApplicationUserService;
 
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import io.jsonwebtoken.JwtException;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,8 +23,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 
 public class AuthenticateJwtFilter extends OncePerRequestFilter {
 
+    private final String apiSalt;
     private final String processing;
-    private final CustomUserDetailsService userDetailsService;
+    private final ApplicationUserService apiUserService;
     private final EncryptionHandlers encryptionHandlers;
 
     @Override
@@ -30,10 +34,11 @@ public class AuthenticateJwtFilter extends OncePerRequestFilter {
                 || isAuthenticated();
     }
 
-    public AuthenticateJwtFilter(EncryptionHandlers encryptionHandlers, CustomUserDetailsService userDetailsService,
-            String processing) {
+    public AuthenticateJwtFilter(ApplicationUserService apiUserService, EncryptionHandlers encryptionHandlers,
+            String processing, String apiSalt) {
+        this.apiSalt = apiSalt;
+        this.apiUserService = apiUserService;
         this.encryptionHandlers = encryptionHandlers;
-        this.userDetailsService = userDetailsService;
         this.processing = processing;
     }
 
@@ -49,16 +54,26 @@ public class AuthenticateJwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String jwt = encryptionHandlers.getAuthHeader(request);
-        final String username = encryptionHandlers.extractUsername(jwt);
-        
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+        final String remoteAddr = request.getRemoteAddr();
+        final String username = encryptionHandlers.getMacPasswordEncoder(apiSalt).encode(remoteAddr);
+        final String token = encryptionHandlers.getAuthHeader(request);
 
-        if (encryptionHandlers.validateToken(jwt, userDetails)) {
-            UsernamePasswordAuthenticationToken uPassAuthToken = new UsernamePasswordAuthenticationToken(userDetails,
-                    null, userDetails.getAuthorities());
-            uPassAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(uPassAuthToken);
+        if (Strings.isNullOrEmpty(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            if (encryptionHandlers.validateToken(token, username)) {
+                UserDetails userDetails = apiUserService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken uPassAuthToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+
+                uPassAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(uPassAuthToken);
+            }
+        } catch (JwtException e) {
+            throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
         }
 
         filterChain.doFilter(request, response);

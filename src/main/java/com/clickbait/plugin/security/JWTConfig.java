@@ -1,15 +1,15 @@
 package com.clickbait.plugin.security;
 
 public class JWTConfig {
-    private String secretkey;
+    private String secretKey;
     private int expiration;
 
-    public String getSecretkey() {
-        return secretkey;
+    public String getSecretKey() {
+        return secretKey;
     }
 
-    public void setSecretkey(String secretkey) {
-        this.secretkey = secretkey;
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 
     public int getExpiration() {

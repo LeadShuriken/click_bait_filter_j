@@ -35,11 +35,11 @@ DO $$ BEGIN
         name plugin.user_name_type,
         password plugin.user_password_type,
         role plugin.user_role_type,
+        privileges TEXT[],
         enabled BOOLEAN,          
         account_expired BOOLEAN,  
         account_locked BOOLEAN,   
-        cred_expired BOOLEAN,    
-        privileges TEXT[]
+        cred_expired BOOLEAN
     );
 EXCEPTION
     WHEN duplicate_object THEN null;

@@ -11,7 +11,7 @@ public class AuthenticatedUser implements UserDetails {
 
     private final User user;
 
-    protected AuthenticatedUser(User user) {
+    public AuthenticatedUser(User user) {
         this.user = user;
     }
 
@@ -22,17 +22,17 @@ public class AuthenticatedUser implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return user.getAccountExpired();
+        return !user.getAccountExpired();
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return user.getAccountLocked();
+        return !user.getAccountLocked();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return user.getCredExpired();
+        return !user.getCredExpired();
     }
 
     @Override

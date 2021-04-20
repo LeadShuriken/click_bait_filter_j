@@ -1,20 +1,19 @@
 package com.clickbait.plugin.security;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
+import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Service
 @ConfigurationProperties(prefix = "encryption")
@@ -24,6 +23,7 @@ public class EncryptionHandlers {
     private String authHeader;
     private JWTConfig jwtConfig;
     private PBKDF2Config pbkdf2Config;
+    private MacConfig passwordEncoder;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -33,40 +33,57 @@ public class EncryptionHandlers {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public PasswordEncoder getMacPasswordEncoder() {
+        return ApiPasswordEncoder.ApiPasswordEncoder(passwordEncoder.getAlgorithm());
+    }
+
+    public PasswordEncoder getMacPasswordEncoder(String salt) {
+        ApiPasswordEncoder apiPasswordEncoder = ApiPasswordEncoder.ApiPasswordEncoder(passwordEncoder.getAlgorithm());
+        apiPasswordEncoder.setSalt(salt);
+        return apiPasswordEncoder;
+    }
+
+    public SecretKey getSecretKey() {
+        return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes());
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(jwtConfig.getSecretkey()).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(getSecretKey()).parseClaimsJws(token).getBody();
     }
 
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String userName) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userName);
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+    public String createToken(Authentication authResult) {
+        return Jwts.builder().setSubject(authResult.getName()).claim("authorities", authResult.getAuthorities())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtConfig.getExpiration()))
-                .signWith(SignatureAlgorithm.HS256, jwtConfig.getSecretkey()).compact();
+                .signWith(getSecretKey()).compact();
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateToken(String token, String userNameP) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return (username.equals(userNameP) && !isTokenExpired(token));
     }
 
-    public String hash(String salt, String password) {
+    public String Pbkdf2Hash(String salt, String password) {
         Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(salt, pbkdf2Config.getIterations(),
                 pbkdf2Config.getHashWidth());
         pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
         return pbkdf2PasswordEncoder.encode(password);
+    }
+
+    public Boolean Pbkdf2Matches(String row, String encoded, String salt) {
+        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(salt, pbkdf2Config.getIterations(),
+                pbkdf2Config.getHashWidth());
+        pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
+        return pbkdf2PasswordEncoder.matches(row, encoded);
     }
 
     public String getTokenPrefix() {
@@ -83,6 +100,10 @@ public class EncryptionHandlers {
 
     public String getAuthHeader(HttpServletRequest request) {
         return request.getHeader(authHeader).substring(tokenPrefix.length() + 1);
+    }
+
+    public String getAuthHeader(String header) {
+        return header.substring(tokenPrefix.length() + 1);
     }
 
     public void setAuthHeader(String authHeader) {
@@ -103,5 +124,13 @@ public class EncryptionHandlers {
 
     public void setPbkdf2Config(PBKDF2Config pbkdf2Config) {
         this.pbkdf2Config = pbkdf2Config;
+    }
+
+    public MacConfig getPasswordEncoder() {
+        return passwordEncoder;
+    }
+
+    public void setPasswordEncoder(MacConfig passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
     }
 }
