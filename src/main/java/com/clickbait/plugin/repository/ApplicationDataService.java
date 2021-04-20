@@ -12,14 +12,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class ApplicationDao {
+public class ApplicationDataService {
 
     private final UserDataService userAccessService;
     private final TabDataService tabAccessService;
     private final ClickDataService clickAccessService;
 
     @Autowired
-    public ApplicationDao(UserDataService userAccessService, TabDataService tabAccessService,
+    public ApplicationDataService(UserDataService userAccessService, TabDataService tabAccessService,
             ClickDataService clickAccessService) {
         this.clickAccessService = clickAccessService;
         this.userAccessService = userAccessService;

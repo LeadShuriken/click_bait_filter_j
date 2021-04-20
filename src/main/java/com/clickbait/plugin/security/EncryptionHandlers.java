@@ -5,6 +5,9 @@ import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
+
+import com.clickbait.plugin.dao.User;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +24,8 @@ public class EncryptionHandlers {
 
     private String tokenPrefix;
     private String authHeader;
+    private String adminNameHeader;
+    private String adminPasswordHeader;
     private JWTConfig jwtConfig;
     private PBKDF2Config pbkdf2Config;
     private MacConfig passwordEncoder;
@@ -106,6 +111,12 @@ public class EncryptionHandlers {
         return header.substring(tokenPrefix.length() + 1);
     }
 
+    public User getAdminFromHeader(HttpServletRequest request) {
+        final String username = request.getHeader(adminNameHeader);
+        final String password = request.getHeader(adminPasswordHeader);
+        return new User(username, password);
+    }
+
     public void setAuthHeader(String authHeader) {
         this.authHeader = authHeader;
     }
@@ -132,5 +143,21 @@ public class EncryptionHandlers {
 
     public void setPasswordEncoder(MacConfig passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public String getAdminNameHeader() {
+        return adminNameHeader;
+    }
+
+    public void setAdminNameHeader(String adminNameHeader) {
+        this.adminNameHeader = adminNameHeader;
+    }
+
+    public String getAdminPasswordHeader() {
+        return adminPasswordHeader;
+    }
+
+    public void setAdminPasswordHeader(String adminPasswordHeader) {
+        this.adminPasswordHeader = adminPasswordHeader;
     }
 }

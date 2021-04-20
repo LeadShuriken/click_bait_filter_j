@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -20,6 +21,7 @@ import static com.clickbait.plugin.security.ApplicationUserRole.*;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class CustomWebSecurity extends WebSecurityConfigurerAdapter {
 
     @Value("${spring.profiles.active}")
@@ -30,6 +32,9 @@ public class CustomWebSecurity extends WebSecurityConfigurerAdapter {
 
     @Value("${api.endpoints.authentication}")
     private String authenticationEndpoint;
+
+    @Value("${api.endpoints.adminAuthentication}")
+    private String adminAuthentication;
 
     @Value("${encryption.passwordEncoder.salt}")
     private String apiSalt;
@@ -49,21 +54,18 @@ public class CustomWebSecurity extends WebSecurityConfigurerAdapter {
         http.httpBasic().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         if (isProd || shouldAuthenticate) {
-            http.addFilterBefore(new AuthenticationFilter(authenticationManager(), applicationUserService,
-                    encryptionHandlers, authenticationEndpoint, apiSalt), UsernamePasswordAuthenticationFilter.class)
+            http.addFilterBefore(
+                    new AuthenticationFilter(authenticationManager(), applicationUserService, encryptionHandlers,
+                            authenticationEndpoint, apiSalt, adminAuthentication),
+                    UsernamePasswordAuthenticationFilter.class)
                     .addFilterAfter(
                             new AuthenticateJwtFilter(applicationUserService, encryptionHandlers, processing, apiSalt),
                             UsernamePasswordAuthenticationFilter.class)
-                    .authorizeRequests()
-                    .antMatchers("/**").hasAnyRole(USER.name(), ADMIN.name())
-                    .antMatchers(HttpMethod.GET, "/**").denyAll()
-                    .antMatchers(HttpMethod.DELETE, "/**").denyAll()
-                    .antMatchers(HttpMethod.HEAD, "/**").denyAll()
-                    .antMatchers(HttpMethod.OPTIONS, "/**").denyAll()
-                    .antMatchers(HttpMethod.PATCH, "/**").denyAll()
-                    .antMatchers(HttpMethod.PUT, "/**").denyAll()
-                    .antMatchers(HttpMethod.TRACE, "/**").denyAll()
-                    .anyRequest().authenticated();
+                    .authorizeRequests().antMatchers(HttpMethod.GET, "/**").denyAll()
+                    .antMatchers(HttpMethod.DELETE, "/**").denyAll().antMatchers(HttpMethod.HEAD, "/**").denyAll()
+                    .antMatchers(HttpMethod.OPTIONS, "/**").denyAll().antMatchers(HttpMethod.PATCH, "/**").denyAll()
+                    .antMatchers(HttpMethod.PUT, "/**").denyAll().antMatchers(HttpMethod.TRACE, "/**").denyAll()
+                    .antMatchers("/**").hasAnyRole(USER.name(), ADMIN.name()).anyRequest().authenticated();
         } else {
             http.authorizeRequests().anyRequest().permitAll();
         }

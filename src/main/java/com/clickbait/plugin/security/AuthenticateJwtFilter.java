@@ -30,8 +30,7 @@ public class AuthenticateJwtFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return !request.getMethod().equalsIgnoreCase("POST") || !request.getRequestURI().matches(processing)
-                || isAuthenticated();
+        return !request.getRequestURI().matches(processing) || isAuthenticated();
     }
 
     public AuthenticateJwtFilter(ApplicationUserService apiUserService, EncryptionHandlers encryptionHandlers,

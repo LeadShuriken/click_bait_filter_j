@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.clickbait.plugin.dao.User;
 import com.clickbait.plugin.services.ApplicationUserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,22 +23,25 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     private final String apiSalt;
     private final String authentication;
+    private final String adminAuthentication;
     private final EncryptionHandlers encryptionHandlers;
     private final ApplicationUserService apiUserService;
     private final AuthenticationManager authenticationManager;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return !request.getMethod().equalsIgnoreCase("POST") || !request.getRequestURI().equals(authentication);
+        return !request.getRequestURI().matches(authentication)
+                || !request.getRequestURI().matches(adminAuthentication);
     }
 
     public AuthenticationFilter(AuthenticationManager authenticationManager, ApplicationUserService apiUserService,
-            EncryptionHandlers encryptionHandlers, String authentication, String apiSalt) {
+            EncryptionHandlers encryptionHandlers, String authentication, String apiSalt, String adminAuthentication) {
         this.apiSalt = apiSalt;
         this.apiUserService = apiUserService;
         this.authenticationManager = authenticationManager;
         this.encryptionHandlers = encryptionHandlers;
         this.authentication = authentication;
+        this.adminAuthentication = adminAuthentication;
     }
 
     private Authentication authenticate(String username, String password, HttpServletRequest request) {
@@ -52,32 +56,37 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         Authentication authenticate = null;
 
-        final String remoteAddr = request.getRemoteAddr();
-        final String username = encryptionHandlers.getMacPasswordEncoder(apiSalt).encode(remoteAddr);
         final String token = encryptionHandlers.getAuthHeader(request);
 
-        if (Strings.isNullOrEmpty(token)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (request.getRequestURI().matches(adminAuthentication)) {
+            User adm = encryptionHandlers.getAdminFromHeader(request);
+            authenticate = authenticate(adm.getName(), adm.getPassword(), request);
+        } else {
+            final String remoteAddr = request.getRemoteAddr();
+            final String username = encryptionHandlers.getMacPasswordEncoder(apiSalt).encode(remoteAddr);
 
-        // What it takes
-        try {
-            if (encryptionHandlers.validateToken(token, username)) {
-                UserDetails userDetails = apiUserService.loadUserByUsername(username);
-                authenticate = authenticate(username, userDetails.getPassword(), request);
+            if (Strings.isNullOrEmpty(token)) {
+                filterChain.doFilter(request, response);
+                return;
             }
-        } catch (ExpiredJwtException e) {
+
             try {
-                UserDetails userDetails = apiUserService.loadUserByUsername(e.getClaims().getSubject());
-                authenticate = authenticate(userDetails.getUsername(), userDetails.getPassword(), request);
-            } catch (Exception ex) {
-                final String password = encryptionHandlers.getMacPasswordEncoder(remoteAddr).encode(token);
+                if (encryptionHandlers.validateToken(token, username)) {
+                    UserDetails userDetails = apiUserService.loadUserByUsername(username);
+                    authenticate = authenticate(username, userDetails.getPassword(), request);
+                }
+            } catch (ExpiredJwtException e) {
                 try {
-                    authenticate = authenticate(username, password, request);
-                } catch (Exception exc) {
-                    apiUserService.loadOrCreateUserByUsernamePassword(username, password);
-                    authenticate = authenticate(username, password, request);
+                    UserDetails userDetails = apiUserService.loadUserByUsername(e.getClaims().getSubject());
+                    authenticate = authenticate(userDetails.getUsername(), userDetails.getPassword(), request);
+                } catch (Exception ex) {
+                    final String password = encryptionHandlers.getMacPasswordEncoder(remoteAddr).encode(token);
+                    try {
+                        authenticate = authenticate(username, password, request);
+                    } catch (Exception exc) {
+                        apiUserService.loadOrCreateUserByUsernamePassword(username, password);
+                        authenticate = authenticate(username, password, request);
+                    }
                 }
             }
         }
