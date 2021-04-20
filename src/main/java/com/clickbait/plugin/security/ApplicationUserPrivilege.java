@@ -8,6 +8,7 @@ public enum ApplicationUserPrivilege {
     DOMAINS_READ("DOMAINS_READ"),
     DOMAINS_WRITE("DOMAINS_WRITE");
 
+ 
     private final String privilege;
 
     private ApplicationUserPrivilege(String privilege) {

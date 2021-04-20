@@ -31,7 +31,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return !request.getRequestURI().matches(authentication)
-                || !request.getRequestURI().matches(adminAuthentication);
+                && !request.getRequestURI().matches(adminAuthentication);
     }
 
     public AuthenticationFilter(AuthenticationManager authenticationManager, ApplicationUserService apiUserService,
@@ -56,12 +56,12 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         Authentication authenticate = null;
 
-        final String token = encryptionHandlers.getAuthHeader(request);
-
         if (request.getRequestURI().matches(adminAuthentication)) {
+            encryptionHandlers.getMacPasswordEncoder(apiSalt);
             User adm = encryptionHandlers.getAdminFromHeader(request);
             authenticate = authenticate(adm.getName(), adm.getPassword(), request);
         } else {
+            final String token = encryptionHandlers.getAuthHeader(request);
             final String remoteAddr = request.getRemoteAddr();
             final String username = encryptionHandlers.getMacPasswordEncoder(apiSalt).encode(remoteAddr);
 
@@ -73,7 +73,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             try {
                 if (encryptionHandlers.validateToken(token, username)) {
                     UserDetails userDetails = apiUserService.loadUserByUsername(username);
-                    authenticate = authenticate(username, userDetails.getPassword(), request);
+                    authenticate = authenticate(userDetails.getUsername(), userDetails.getPassword(), request);
                 }
             } catch (ExpiredJwtException e) {
                 try {

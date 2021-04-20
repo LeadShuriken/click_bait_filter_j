@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS plugin.users (
     cred_expired BOOLEAN NOT NULL DEFAULT FALSE,     -- sohead
     password plugin.user_password_type NOT NULL,
     role_id plugin.id_type,
-    UNIQUE (name, password),
+    UNIQUE (name),
     FOREIGN KEY (role_id) REFERENCES plugin.role (role_id) ON DELETE SET NULL
 );
 

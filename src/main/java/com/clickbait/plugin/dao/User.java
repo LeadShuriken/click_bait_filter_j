@@ -1,49 +1,59 @@
 package com.clickbait.plugin.dao;
 
+import com.clickbait.plugin.annotations.UUIDA;
 import com.clickbait.plugin.security.ApplicationUserRole;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import java.util.List;
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 
+    @UUIDA
     @JsonProperty("userId")
     private final UUID userId;
 
-    @NotBlank
     @JsonProperty("name")
+    @Size(max = 100, min = 1)
     private final String name;
 
-    @NotBlank
     @JsonProperty("password")
+    @Size(max = 200, min = 1)
     private final String password;
 
-    @NotBlank
     @JsonProperty("role")
     private final ApplicationUserRole role;
 
-    @NotBlank
     @JsonProperty("privileges")
     private final List<ApplicationUserPrivilege> privileges;
 
-    @NotBlank
     @JsonProperty("enabled")
     private final Boolean enabled;
 
-    @NotBlank
     @JsonProperty("accountExpired")
     private final Boolean accountExpired;
 
-    @NotBlank
     @JsonProperty("accountLocked")
     private final Boolean accountLocked;
 
-    @NotBlank
     @JsonProperty("credExpired")
     private final Boolean credExpired;
+
+    public User() {
+        this.userId = null;
+        this.name = null;
+        this.password = null;
+        this.privileges = null;
+        this.role = null;
+        this.enabled = null;
+        this.accountExpired = null;
+        this.accountLocked = null;
+        this.credExpired = null;
+    }
 
     public User(UUID userId) {
         this.userId = userId;

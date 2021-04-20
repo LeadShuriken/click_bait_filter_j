@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum ApplicationUserRole {
-    USER(Sets.newHashSet(USERS_WRITE, CLICKS_WRITE, DOMAINS_READ, DOMAINS_WRITE)),
+    USER(Sets.newHashSet(CLICKS_WRITE, DOMAINS_READ)),
     ADMIN(Sets.newHashSet(USERS_READ, USERS_WRITE, CLICKS_READ, CLICKS_WRITE, DOMAINS_READ, DOMAINS_WRITE));
 
     private final Set<ApplicationUserPrivilege> privileges;

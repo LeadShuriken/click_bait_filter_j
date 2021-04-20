@@ -17,10 +17,8 @@ DO $$ BEGIN
         'DOMAINS_WRITE'
     );
     CREATE TYPE plugin.user_privileges AS ENUM (
-        'USERS_WRITE',
         'CLICKS_WRITE',
-        'DOMAINS_READ',
-        'DOMAINS_WRITE'
+        'DOMAINS_READ'
     );
     CREATE TYPE plugin.admin_privileges AS ENUM (
         'USERS_READ',

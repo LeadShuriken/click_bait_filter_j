@@ -34,12 +34,8 @@ public class TabDataService {
         }
 
         UserTab getUserTab(UUID userId, int index) {
-                try {
-                        return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_tab_data(?, ?)", mapTabsFomDb(),
-                                        new Object[] { userId, index });
-                } catch (EmptyResultDataAccessException e) {
-                        return null;
-                }
+                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_tab_data(?, ?)", mapTabsFomDb(),
+                                new Object[] { userId, index });
         }
 
         UUID insertTab(UUID userId, String name, int index) {

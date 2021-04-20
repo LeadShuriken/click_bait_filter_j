@@ -29,12 +29,8 @@ public class UserDataService {
         }
 
         User getUser(UUID id, String name, String password) {
-                try {
-                        return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?, ?)", mapUsersFomDb(),
-                                        new Object[] { id, name, password });
-                } catch (EmptyResultDataAccessException e) {
-                        return null;
-                }
+                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?, ?)", mapUsersFomDb(),
+                                new Object[] { id, name, password });
         }
 
         UUID insertUser(String name, String password, String role) {
