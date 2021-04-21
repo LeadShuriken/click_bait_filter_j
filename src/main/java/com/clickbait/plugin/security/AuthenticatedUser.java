@@ -49,4 +49,8 @@ public class AuthenticatedUser implements UserDetails {
     public String getPassword() {
         return user.getPassword();
     }
+
+    public ApplicationUserRole getRole() {
+        return user.getRole();
+    }
 }

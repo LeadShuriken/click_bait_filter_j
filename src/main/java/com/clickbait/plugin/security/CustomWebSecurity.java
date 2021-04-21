@@ -36,12 +36,6 @@ public class CustomWebSecurity extends WebSecurityConfigurerAdapter {
     @Value("${api.endpoints.adminAuthentication}")
     private String adminAuthentication;
 
-    @Value("${encryption.passwordEncoder.salt}")
-    private String apiSalt;
-
-    @Value("${api.endpoints.processing}")
-    private String processing;
-
     @Autowired
     private EncryptionHandlers encryptionHandlers;
 
@@ -54,12 +48,10 @@ public class CustomWebSecurity extends WebSecurityConfigurerAdapter {
         http.httpBasic().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         if (isProd || shouldAuthenticate) {
-            http.addFilterBefore(
-                    new AuthenticationFilter(authenticationManager(), applicationUserService, encryptionHandlers,
-                            authenticationEndpoint, apiSalt, adminAuthentication),
+            http.addFilterBefore(new AuthenticationFilter(authenticationManager(), applicationUserService,
+                    encryptionHandlers, authenticationEndpoint, adminAuthentication),
                     UsernamePasswordAuthenticationFilter.class)
-                    .addFilterAfter(
-                            new AuthenticateJwtFilter(applicationUserService, encryptionHandlers, processing, apiSalt),
+                    .addFilterAfter(new AuthenticateJwtFilter(applicationUserService, encryptionHandlers),
                             UsernamePasswordAuthenticationFilter.class)
                     .authorizeRequests().antMatchers(HttpMethod.GET, "/**").denyAll()
                     .antMatchers(HttpMethod.DELETE, "/**").denyAll().antMatchers(HttpMethod.HEAD, "/**").denyAll()

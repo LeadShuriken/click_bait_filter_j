@@ -8,6 +8,7 @@ import com.clickbait.plugin.security.ApplicationUserRole;
 import com.clickbait.plugin.security.AuthenticatedUser;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,7 +20,7 @@ public class ApplicationUserService implements UserDetailsService {
     private final ApplicationDataService applicationDao;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public AuthenticatedUser loadUserByUsername(String username) throws UsernameNotFoundException {
         return new AuthenticatedUser(applicationDao.getUser(username));
     }
 
@@ -29,8 +30,10 @@ public class ApplicationUserService implements UserDetailsService {
     }
 
     public UserDetails loadOrCreateUserByUsernamePassword(String username, String password) {
-        User a = applicationDao.getUser(username, password);
-        if (a == null) {
+        User a = null;
+        try {
+            a = applicationDao.getUser(username, password);
+        } catch (EmptyResultDataAccessException e) {
             UUID newUserId = applicationDao.addNewUser(username, password, ApplicationUserRole.USER);
             a = applicationDao.getUser(newUserId);
         }

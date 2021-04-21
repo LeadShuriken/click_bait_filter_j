@@ -4,7 +4,6 @@ import com.clickbait.plugin.dao.*;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
 import com.clickbait.plugin.security.ApplicationUserRole;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -97,7 +96,7 @@ public class UserDataService {
 
         int activateUser(UUID userId, Boolean enabled, Boolean accountExpired, Boolean accountLocked,
                         Boolean credExpired) {
-                return jdbcTemplate.update("CALL plugin.user_authentication(?, ?, ?, ?)", userId, enabled,
+                return jdbcTemplate.update("CALL plugin.user_authentication(?, ?, ?, ?, ?)", userId, enabled,
                                 accountExpired, accountLocked, credExpired);
         }
 

@@ -2,6 +2,9 @@ package com.clickbait.plugin.controllers;
 
 import com.clickbait.plugin.repository.ApplicationDataService;
 import com.clickbait.plugin.security.ApplicationUserRole;
+import com.clickbait.plugin.security.EncryptionHandlers;
+
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -17,16 +20,49 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/${api.version}")
-public class ApiControllers {
+public class ApiUserController {
 
     @Autowired
     private ApplicationDataService applicationDataService;
 
+    @Autowired
+    private EncryptionHandlers security;
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = "${api.endpoints.login_admin}")
+    public void loginAdmin() {
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_READ')")
+    @PostMapping(value = "${api.endpoints.is_active}")
+    public boolean isActive(@Valid @RequestBody User user) {
+        return applicationDataService.isUserActive(user.getUserId());
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_READ')")
+    @PostMapping(value = "${api.endpoints.set_active}")
+    public void isSetActive(@Valid @RequestBody User user) {
+        applicationDataService.activateUser(user.getUserId(), user.getEnabled(), user.getAccountExpired(),
+                user.getAccountLocked(), user.getCredExpired());
+    }
+
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_WRITE')")
     @PostMapping(value = "${api.endpoints.register_admin}")
     public User registerAdmin(@Valid @RequestBody User user) {
-        return applicationDataService.getUser(
-                applicationDataService.addNewUser(user.getName(), user.getPassword(), ApplicationUserRole.ADMIN));
+        return applicationDataService.getUser(applicationDataService.addNewUser(user.getName(),
+                security.pbkdf2Hash(user.getPassword()), ApplicationUserRole.ADMIN));
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_WRITE')")
+    @PostMapping(value = "${api.endpoints.delete_user}")
+    public void deleteUser(@Valid @RequestBody User user) {
+        applicationDataService.deleteUser(user.getUserId());
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_WRITE')")
+    @PostMapping(value = "${api.endpoints.update_user}")
+    public void updateUser(@Valid @RequestBody User user) {
+        applicationDataService.updateUser(user.getUserId(), user);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_READ')")
@@ -36,6 +72,12 @@ public class ApiControllers {
             return applicationDataService.getUser(user.getUserId());
         }
         return applicationDataService.getUser(user.getName(), user.getPassword());
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_READ')")
+    @PostMapping(value = "${api.endpoints.get_all_user}")
+    public List<User> getUsers() {
+        return applicationDataService.getAllUsers();
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_WRITE')")
@@ -48,17 +90,5 @@ public class ApiControllers {
     @PostMapping(value = "${api.endpoints.remove_priv}")
     public void removePrivilege(@Valid @RequestBody PrivilegesRequest privileges) {
         applicationDataService.removePrivilige(privileges.getUserId(), privileges.getPrivileges());
-    }
-
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('CLICKS_WRITE')")
-    @PostMapping(value = "${api.endpoints.clicks_register}")
-    public String registerLink() {
-        return "Hello Click!";
-    }
-
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
-    @PostMapping(value = "${api.endpoints.page_segmentation}")
-    public String fetchPageSegmentation() {
-        return "Hello Page Segmentation!";
     }
 }

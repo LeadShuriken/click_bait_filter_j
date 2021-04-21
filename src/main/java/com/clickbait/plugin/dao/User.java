@@ -55,48 +55,12 @@ public class User {
         this.credExpired = null;
     }
 
-    public User(UUID userId) {
-        this.userId = userId;
-        this.name = null;
-        this.password = null;
-        this.privileges = null;
-        this.role = null;
-        this.enabled = null;
-        this.accountExpired = null;
-        this.accountLocked = null;
-        this.credExpired = null;
-    }
-
     public User(String name, String password) {
         this.userId = null;
         this.name = name;
         this.password = password;
         this.privileges = null;
         this.role = null;
-        this.enabled = null;
-        this.accountExpired = null;
-        this.accountLocked = null;
-        this.credExpired = null;
-    }
-
-    public User(String name, String password, ApplicationUserRole role) {
-        this.userId = null;
-        this.name = name;
-        this.password = password;
-        this.privileges = null;
-        this.role = role;
-        this.enabled = null;
-        this.accountExpired = null;
-        this.accountLocked = null;
-        this.credExpired = null;
-    }
-
-    public User(String name, String password, ApplicationUserRole role, List<ApplicationUserPrivilege> privileges) {
-        this.userId = null;
-        this.name = name;
-        this.password = password;
-        this.privileges = privileges;
-        this.role = role;
         this.enabled = null;
         this.accountExpired = null;
         this.accountLocked = null;

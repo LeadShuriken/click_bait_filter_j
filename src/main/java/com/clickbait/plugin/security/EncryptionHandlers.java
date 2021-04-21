@@ -77,15 +77,15 @@ public class EncryptionHandlers {
         return (username.equals(userNameP) && !isTokenExpired(token));
     }
 
-    public String Pbkdf2Hash(String salt, String password) {
-        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(salt, pbkdf2Config.getIterations(),
+    public String pbkdf2Hash( String password) {
+        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(passwordEncoder.getSalt(), pbkdf2Config.getIterations(),
                 pbkdf2Config.getHashWidth());
         pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
         return pbkdf2PasswordEncoder.encode(password);
     }
 
-    public Boolean Pbkdf2Matches(String row, String encoded, String salt) {
-        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(salt, pbkdf2Config.getIterations(),
+    public Boolean pbkdf2Matches(String row, String encoded) {
+        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(passwordEncoder.getSalt(), pbkdf2Config.getIterations(),
                 pbkdf2Config.getHashWidth());
         pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
         return pbkdf2PasswordEncoder.matches(row, encoded);

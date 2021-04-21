@@ -12,8 +12,12 @@ import com.clickbait.plugin.services.ApplicationUserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.filter.OncePerRequestFilter;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,10 +25,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 
 public class AuthenticationFilter extends OncePerRequestFilter {
 
-    private final String apiSalt;
     private final String authentication;
     private final String adminAuthentication;
-    private final EncryptionHandlers encryptionHandlers;
+    private final EncryptionHandlers security;
     private final ApplicationUserService apiUserService;
     private final AuthenticationManager authenticationManager;
 
@@ -35,11 +38,10 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     }
 
     public AuthenticationFilter(AuthenticationManager authenticationManager, ApplicationUserService apiUserService,
-            EncryptionHandlers encryptionHandlers, String authentication, String apiSalt, String adminAuthentication) {
-        this.apiSalt = apiSalt;
+            EncryptionHandlers security, String authentication, String adminAuthentication) {
         this.apiUserService = apiUserService;
         this.authenticationManager = authenticationManager;
-        this.encryptionHandlers = encryptionHandlers;
+        this.security = security;
         this.authentication = authentication;
         this.adminAuthentication = adminAuthentication;
     }
@@ -51,50 +53,81 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         return authenticationManager.authenticate(uPassAuthToken);
     }
 
+    private Authentication authenticate(UserDetails userDetails, HttpServletRequest request) {
+        UsernamePasswordAuthenticationToken uPassAuthToken = new UsernamePasswordAuthenticationToken(
+                userDetails.getUsername(), userDetails.getPassword());
+        uPassAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        return authenticationManager.authenticate(uPassAuthToken);
+    }
+
+    private Authentication passwordVer(AuthenticatedUser userDetails, HttpServletRequest request) {
+        if (userDetails.getRole() == ApplicationUserRole.ADMIN) {
+            User adm = security.getAdminFromHeader(request);
+            // No admin token rebuilds without pass
+            if (adm.getName().equals(userDetails.getUsername())
+                    && security.pbkdf2Matches(adm.getPassword(), userDetails.getPassword())) {
+                return authenticate(userDetails, request);
+            }
+        } else if (security.pbkdf2Matches(userDetails.getUsername(), userDetails.getPassword())) {
+            return authenticate(userDetails, request);
+        }
+        return null;
+    }
+
+    private Authentication createWorkflow(String addr, String token, HttpServletRequest request) {
+        String username = security.getMacPasswordEncoder(addr).encode(token);
+        String password = security.pbkdf2Hash(username);
+        try {
+            return authenticate(username, password, request);
+        } catch (InternalAuthenticationServiceException | BadCredentialsException
+                | EmptyResultDataAccessException exc) {
+            apiUserService.loadOrCreateUserByUsernamePassword(username, password);
+            return authenticate(username, password, request);
+        }
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         Authentication authenticate = null;
+        security.getMacPasswordEncoder(security.getPasswordEncoder().getSalt());
 
         if (request.getRequestURI().matches(adminAuthentication)) {
-            encryptionHandlers.getMacPasswordEncoder(apiSalt);
-            User adm = encryptionHandlers.getAdminFromHeader(request);
-            authenticate = authenticate(adm.getName(), adm.getPassword(), request);
+            User adm = security.getAdminFromHeader(request);
+            UserDetails userDetails = apiUserService.loadUserByUsername(adm.getName());
+            if (security.pbkdf2Matches(adm.getPassword(), userDetails.getPassword())) {
+                authenticate = authenticate(userDetails.getUsername(), userDetails.getPassword(), request);
+            }
         } else {
-            final String token = encryptionHandlers.getAuthHeader(request);
-            final String remoteAddr = request.getRemoteAddr();
-            final String username = encryptionHandlers.getMacPasswordEncoder(apiSalt).encode(remoteAddr);
+            final String token = security.getAuthHeader(request);
+            final String addr = request.getRemoteAddr();
 
-            if (Strings.isNullOrEmpty(token)) {
+            // Block ips here
+            if (Strings.isNullOrEmpty(token) || Strings.isNullOrEmpty(addr)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
             try {
-                if (encryptionHandlers.validateToken(token, username)) {
-                    UserDetails userDetails = apiUserService.loadUserByUsername(username);
-                    authenticate = authenticate(userDetails.getUsername(), userDetails.getPassword(), request);
-                }
-            } catch (ExpiredJwtException e) {
+                String username = security.extractUsername(token);
+                AuthenticatedUser userDetails = apiUserService.loadUserByUsername(username);
+                authenticate = passwordVer(userDetails, request);
+            } catch (ExpiredJwtException expt) {
                 try {
-                    UserDetails userDetails = apiUserService.loadUserByUsername(e.getClaims().getSubject());
-                    authenticate = authenticate(userDetails.getUsername(), userDetails.getPassword(), request);
-                } catch (Exception ex) {
-                    final String password = encryptionHandlers.getMacPasswordEncoder(remoteAddr).encode(token);
-                    try {
-                        authenticate = authenticate(username, password, request);
-                    } catch (Exception exc) {
-                        apiUserService.loadOrCreateUserByUsernamePassword(username, password);
-                        authenticate = authenticate(username, password, request);
-                    }
+                    AuthenticatedUser userDetails = apiUserService.loadUserByUsername(expt.getClaims().getSubject());
+                    authenticate = passwordVer(userDetails, request);
+                } catch (EmptyResultDataAccessException ex) {
+                    authenticate = createWorkflow(addr, token, request);
                 }
+            } catch (EmptyResultDataAccessException | MalformedJwtException empt) {
+                authenticate = createWorkflow(addr, token, request);
             }
         }
 
         SecurityContextHolder.getContext().setAuthentication(authenticate);
-        String jwt = encryptionHandlers.createToken(authenticate);
 
-        response.setHeader(encryptionHandlers.getAuthHeader(), encryptionHandlers.getTokenPrefix() + " " + jwt);
+        response.setHeader(security.getAuthHeader(),
+                security.getTokenPrefix() + " " + security.createToken(authenticate));
 
         filterChain.doFilter(request, response);
     }
