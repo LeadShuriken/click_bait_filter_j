@@ -4,6 +4,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import com.clickbait.plugin.dao.User;
 
@@ -13,6 +14,10 @@ public class AuthenticatedUser implements UserDetails {
 
     public AuthenticatedUser(User user) {
         this.user = user;
+    }
+
+    public UUID getUserId() {
+        return user.getUserId();
     }
 
     @Override

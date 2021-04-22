@@ -27,8 +27,8 @@ public class TabDataService {
 
         List<UserTab> getUserTabs(UUID userId) {
                 return jdbcTemplate.query(
-                                "SELECT tab.user_id, tab.domain_id, tab.index, domain.name FROM plugin.tab AS tab JOIN plugin.domain AS domain USING (domain_id)"
-                                                + " WHERE tad.user_id = ?",
+                                "SELECT user_id, domain_id, index, domain.name AS name FROM plugin.tab JOIN plugin.domain AS domain USING (domain_id)"
+                                                + " WHERE user_id = ?",
                                 mapTabsFomDb(), new Object[] { userId });
         }
 

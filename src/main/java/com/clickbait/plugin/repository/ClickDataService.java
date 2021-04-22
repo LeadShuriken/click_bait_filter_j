@@ -20,8 +20,9 @@ public class ClickDataService {
                 this.jdbcTemplate = jdbcTemplate;
         }
 
-        List<UserClick> getAllClicks() {
-                return jdbcTemplate.query("SELECT * FROM plugin.get_clicks()", mapClickFromDb());
+        List<UserClick> getDomainClicks(UUID userId, String name) {
+                return jdbcTemplate.query("SELECT * FROM plugin.get_clicks(?, ?)", mapClickFromDb(),
+                                new Object[] { userId, name });
         }
 
         UUID addClick(UUID userId, String domain, String link) {

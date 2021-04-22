@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PrivilegesRequest {
+public class Privileges {
 
     @UUIDA
     @JsonProperty("userId")
@@ -20,12 +20,12 @@ public class PrivilegesRequest {
     @JsonProperty("privileges")
     private final List<ApplicationUserPrivilege> privileges;
 
-    public PrivilegesRequest(UUID userId, List<ApplicationUserPrivilege> privileges) {
+    public Privileges(UUID userId, List<ApplicationUserPrivilege> privileges) {
         this.userId = userId;
         this.privileges = privileges;
     }
 
-    public PrivilegesRequest() {
+    public Privileges() {
         this.userId = null;
         this.privileges = null;
     }

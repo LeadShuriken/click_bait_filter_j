@@ -40,7 +40,10 @@ EXCEPTION
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION plugin.get_clicks()
+CREATE OR REPLACE FUNCTION plugin.get_clicks(
+    user_id_p plugin.id_type DEFAULT NULL,
+    domain_p plugin.domain_name_type DEFAULT NULL
+)
 RETURNS TABLE (
     user_id plugin.id_type,
     domain plugin.domain_name_type,
@@ -59,6 +62,8 @@ BEGIN
     FROM plugin.click AS u_click 
         INNER JOIN plugin.link AS u_link USING (link_id) 
         INNER JOIN plugin.domain AS u_domain 
-        ON u_domain.domain_id = u_link.domain_id;
+        ON u_domain.domain_id = u_link.domain_id
+    WHERE (user_id_p IS NULL OR u_click.user_id = user_id_p)
+    AND (domain_p IS NULL OR u_domain.name = domain_p);
 END;
 $$;

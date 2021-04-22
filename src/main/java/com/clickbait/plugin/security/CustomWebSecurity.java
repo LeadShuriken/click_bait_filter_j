@@ -30,10 +30,10 @@ public class CustomWebSecurity extends WebSecurityConfigurerAdapter {
     @Value("${authentication}")
     private Boolean shouldAuthenticate;
 
-    @Value("${api.endpoints.authentication}")
+    @Value("${api.authentication}")
     private String authenticationEndpoint;
 
-    @Value("${api.endpoints.adminAuthentication}")
+    @Value("${api.adminAuthentication}")
     private String adminAuthentication;
 
     @Autowired

@@ -85,7 +85,7 @@ public class ApplicationDataService {
     }
 
     public List<UserTab> getUserTabs(UUID userId) {
-        return tabAccessService.getAllTabs();
+        return tabAccessService.getUserTabs(userId);
     }
 
     public UserTab getUserTab(UUID userId, int index) {
@@ -96,8 +96,8 @@ public class ApplicationDataService {
         return tabAccessService.insertTab(userId, name, index);
     }
 
-    public List<UserClick> getAllClicks() {
-        return clickAccessService.getAllClicks();
+    public List<UserClick> getDomainClicks(UUID userId, String name) {
+        return clickAccessService.getDomainClicks(userId, name);
     }
 
     public UUID addClick(UUID userId, String domain, String link) {

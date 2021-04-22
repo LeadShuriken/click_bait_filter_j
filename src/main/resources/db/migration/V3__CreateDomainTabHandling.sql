@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS plugin.tab (
     user_id plugin.id_type NOT NULL,
     domain_id plugin.id_type NOT NULL,
     index INTEGER CHECK (index >= 1),
-    PRIMARY KEY (user_id, domain_id),
+    PRIMARY KEY (user_id, domain_id, index),
     FOREIGN KEY (user_id) REFERENCES plugin.users (user_id) ON DELETE CASCADE,
     FOREIGN KEY (domain_id) REFERENCES plugin.domain (domain_id) ON DELETE CASCADE
 );
@@ -21,6 +21,7 @@ LANGUAGE plpgsql
 AS $$
 DECLARE ident CONSTANT plugin.id_type := plugin.id();
 BEGIN
+    DELETE FROM plugin.tab WHERE user_id = tad_id AND index = index_p;
     WITH ROWS AS (
         INSERT INTO plugin.domain (domain_id, name) VALUES (ident, name_p)
         ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name
@@ -33,7 +34,10 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION plugin.get_tab_data(user_id_p plugin.id_type, index_p INTEGER)
+CREATE OR REPLACE FUNCTION plugin.get_tab_data(
+    user_id_p plugin.id_type,
+    index_p INTEGER
+)
 RETURNS TABLE (
     user_id plugin.id_type,
     domain_id plugin.id_type,

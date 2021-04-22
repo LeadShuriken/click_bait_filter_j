@@ -5,10 +5,14 @@ import java.util.UUID;
 
 import javax.validation.constraints.Past;
 
+import com.clickbait.plugin.annotations.UUIDA;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserClick {
 
+    @UUIDA
     @JsonProperty("userId")
     private final UUID userId;
 
@@ -27,6 +31,29 @@ public class UserClick {
         this.domain = domain;
         this.link = link;
         this.atTime = atTime;
+    }
+
+    public UserClick() {
+        this.userId = null;
+        this.domain = null;
+        this.link = null;
+        this.atTime = null;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public LocalDate getAtTime() {
+        return atTime;
     }
 
     @Override
