@@ -24,7 +24,7 @@ CLICKBAIT-FILTER-SERVICE uses a number of open source projects:
 
 Download Java dependancies for the project:
 ```sh
-$ cd click_bait_filter_be
+$ cd click_bait_filter_j
 $ gradlew assembleDevelopmentDebug --refresh-dependencies
 ```
 
