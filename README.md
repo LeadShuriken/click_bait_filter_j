@@ -14,6 +14,7 @@ This service is essentially a backend that authenticates/identifies the user and
 CLICKBAIT-FILTER-SERVICE uses a number of open source projects:
 
   * [JAVA11] - JAVA 11 SDK
+  * [GRADLE] - BUILD AUTOMATION TOOL
   * [SPRING] - JAVA SPRING FRAMEWORK
   * [SPRING-BOOT] - SPRING PROJ BOOTSTRAP
   * [POSTGRESQL] - SQL DATABASE
@@ -57,44 +58,19 @@ This is as the 'click_bait_filter_ml' uses the 'click_bait_filter_be' api's for 
 
 ## Running and Building
 
-This application is an **Express Application**;
-
-### 1. Runing the service
----
-
-* **WITH MICROSOFT VISUAL STUDIO CODE**
-
-  To run the application, open the project in Microsoft VS Code and navigate to the .vscode folder.
-  
-  There you will see the **launch.json** file. And create this run configuration:
-  
-  ```sh
-  {
-      "type": "node",
-      "request": "launch",
-      "name": "LAUNCH",
-      "env": {
-          "API_URL": "/api",
-          "MONGODB_URI": "<MONGO CONNECTION STRING>",
-          "PORT": "4000"
-      },
-      "program": "${workspaceFolder}/index.js",
-      "restart": true,
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
-  }
-  ```
-  More information on [MONGO CONNECTION STRING] formats.
+This application is an **GRADLE APPLICATION USING THE GRADLE WRAPPER**;
 
 * **WITH CLI COMMANDS**
 
   Open the terminal and navigate to the root project folder.
 
   ```sh
-  $ export API_URL=/api && export MONGODB_URI=<MONGO CONNECTION STRING> && export PORT=4000 && node index.js
+  $ gradle build
   ```
-
-  This launches the service on: **http://localhost:4000** 
+  or with no gradle
+  ```sh
+  $ ./gradlew build
+  ```
 
 ### Todos
 
@@ -104,6 +80,7 @@ This application is an **Express Application**;
   [SPRING]: <https://spring.io>
   [SPRING-BOOT]: <https://spring.io/projects/spring-boot>
   [POSTGRESQL]: <https://www.postgresql.org>
+  [GRADLE]: <https://gradle.org>
   [JWT]: <https://jwt.io>
 
   [webpack-chrome-extension-reloader]: <https://github.com/LeadShuriken/webpack-chrome-extension-reloader>
