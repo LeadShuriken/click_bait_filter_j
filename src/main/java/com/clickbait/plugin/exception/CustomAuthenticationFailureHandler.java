@@ -2,7 +2,6 @@ package com.clickbait.plugin.exception;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-// import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
