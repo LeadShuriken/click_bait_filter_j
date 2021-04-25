@@ -25,10 +25,19 @@ public class EncryptionHandlers {
     private String tokenPrefix;
     private String authHeader;
     private String adminNameHeader;
+    private String tflowToken;
     private String adminPasswordHeader;
     private JWTConfig jwtConfig;
     private PBKDF2Config pbkdf2Config;
     private MacConfig passwordEncoder;
+
+    public String getTflowToken() {
+        return tflowToken;
+    }
+
+    public void setTflowToken(String tflowToken) {
+        this.tflowToken = tflowToken;
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -77,16 +86,23 @@ public class EncryptionHandlers {
         return (username.equals(userNameP) && !isTokenExpired(token));
     }
 
-    public String pbkdf2Hash( String password) {
-        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(passwordEncoder.getSalt(), pbkdf2Config.getIterations(),
+    public String pbkdf2Hash(String password) {
+        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(passwordEncoder.getSalt(),
+                pbkdf2Config.getIterations(), pbkdf2Config.getHashWidth());
+        pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
+        return pbkdf2PasswordEncoder.encode(password);
+    }
+
+    public String pbkdf2Hash(String password, String salt) {
+        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(salt, pbkdf2Config.getIterations(),
                 pbkdf2Config.getHashWidth());
         pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
         return pbkdf2PasswordEncoder.encode(password);
     }
 
     public Boolean pbkdf2Matches(String row, String encoded) {
-        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(passwordEncoder.getSalt(), pbkdf2Config.getIterations(),
-                pbkdf2Config.getHashWidth());
+        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(passwordEncoder.getSalt(),
+                pbkdf2Config.getIterations(), pbkdf2Config.getHashWidth());
         pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
         return pbkdf2PasswordEncoder.matches(row, encoded);
     }

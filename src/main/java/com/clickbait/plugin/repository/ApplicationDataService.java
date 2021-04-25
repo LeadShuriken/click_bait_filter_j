@@ -14,50 +14,54 @@ import java.util.UUID;
 @Service
 public class ApplicationDataService {
 
-    private final UserDataService userAccessService;
-    private final TabDataService tabAccessService;
-    private final ClickDataService clickAccessService;
+    private final UsersDataService userDataService;
+    private final TabDataService tabDataService;
+    private final ClickDataService clickDataService;
 
     @Autowired
-    public ApplicationDataService(UserDataService userAccessService, TabDataService tabAccessService,
-            ClickDataService clickAccessService) {
-        this.clickAccessService = clickAccessService;
-        this.userAccessService = userAccessService;
-        this.tabAccessService = tabAccessService;
+    public ApplicationDataService(UsersDataService userDataService, TabDataService tabDataService,
+            ClickDataService clickDataService) {
+        this.clickDataService = clickDataService;
+        this.userDataService = userDataService;
+        this.tabDataService = tabDataService;
     }
 
     public List<User> getAllUsers() {
-        return userAccessService.getAllUsers();
+        return userDataService.getAllUsers();
     }
 
     public User getUser(UUID id) {
-        return userAccessService.getUser(id, null, null);
+        return userDataService.getUser(id, null, null);
     }
 
     public User getUser(String name) {
-        return userAccessService.getUser(null, name, null);
+        return userDataService.getUser(null, name, null);
     }
 
     public User getUser(String name, String password) {
-        return userAccessService.getUser(null, name, password);
+        return userDataService.getUser(null, name, password);
     }
 
     public UUID addNewUser(String name, String password, ApplicationUserRole role) {
-        if (userAccessService.isPasswordTaken(password)) {
+        if (userDataService.isPasswordTaken(password)) {
             return null;
         }
-        return userAccessService.insertUser(name, password, role.name());
+        return userDataService.insertUser(name, password, role.name());
     }
 
     public int deleteUser(UUID userId) {
-        return userAccessService.deleteUser(userId);
+        return userDataService.deleteUser(userId);
+    }
+
+    public int setTflowToken(UUID userId, String token) {
+        return userDataService.setTflowToken(userId, token);
     }
 
     public int updateUser(UUID userId, User user) {
         Optional.ofNullable(user.getPassword()).ifPresent(password -> {
-            boolean taken = userAccessService.isPasswordTaken(password);
+            boolean taken = userDataService.isPasswordTaken(password);
             if (!taken) {
-                userAccessService.updatePassword(userId, password);
+                userDataService.updatePassword(userId, password);
             } else {
                 throw new IllegalStateException("Password is taken");
             }
@@ -67,49 +71,49 @@ public class ApplicationDataService {
         if (user.getPrivileges() != null) {
             priv = user.getPrivileges().stream().map(ApplicationUserPrivilege::getPrivilege).toArray(String[]::new);
         }
-        return userAccessService.updateUser(userId, user.getName(), user.getPassword(), user.getRole().name(), priv);
+        return userDataService.updateUser(userId, user.getName(), user.getPassword(), user.getRole().name(), priv);
     }
 
     public int addPrivilige(UUID userId, List<ApplicationUserPrivilege> privileges) {
-        return userAccessService.addPrivilige(userId,
+        return userDataService.addPrivilige(userId,
                 privileges.stream().map(ApplicationUserPrivilege::getPrivilege).toArray(String[]::new));
     }
 
     public int removePrivilige(UUID userId, List<ApplicationUserPrivilege> privileges) {
-        return userAccessService.removePrivilige(userId,
+        return userDataService.removePrivilige(userId,
                 privileges.stream().map(ApplicationUserPrivilege::getPrivilege).toArray(String[]::new));
     }
 
     public List<UserTab> getAllTabs() {
-        return tabAccessService.getAllTabs();
+        return tabDataService.getAllTabs();
     }
 
     public List<UserTab> getUserTabs(UUID userId) {
-        return tabAccessService.getUserTabs(userId);
+        return tabDataService.getUserTabs(userId);
     }
 
     public UserTab getUserTab(UUID userId, int index) {
-        return tabAccessService.getUserTab(userId, index);
+        return tabDataService.getUserTab(userId, index);
     }
 
     public UUID insertTab(UUID userId, String name, int index) {
-        return tabAccessService.insertTab(userId, name, index);
+        return tabDataService.insertTab(userId, name, index);
     }
 
     public List<UserClick> getDomainClicks(UUID userId, String name) {
-        return clickAccessService.getDomainClicks(userId, name);
+        return clickDataService.getDomainClicks(userId, name);
     }
 
     public UUID addClick(UUID userId, String domain, String link) {
-        return clickAccessService.addClick(userId, domain, link);
+        return clickDataService.addClick(userId, domain, link);
     }
 
     public int activateUser(UUID userId, Boolean enabled, Boolean accountExpired, Boolean accountLocked,
             Boolean credExpired) {
-        return userAccessService.activateUser(userId, enabled, accountExpired, accountLocked, credExpired);
+        return userDataService.activateUser(userId, enabled, accountExpired, accountLocked, credExpired);
     }
 
     public Boolean isUserActive(UUID userId) {
-        return userAccessService.isUserActive(userId);
+        return userDataService.isUserActive(userId);
     }
 }

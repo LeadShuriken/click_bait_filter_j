@@ -14,12 +14,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
-public class UserDataService {
+public class UsersDataService {
 
         private final JdbcTemplate jdbcTemplate;
 
         @Autowired
-        public UserDataService(JdbcTemplate jdbcTemplate) {
+        public UsersDataService(JdbcTemplate jdbcTemplate) {
                 this.jdbcTemplate = jdbcTemplate;
         }
 
@@ -60,6 +60,10 @@ public class UserDataService {
         boolean isPasswordTaken(String password) {
                 return jdbcTemplate.queryForObject("SELECT EXISTS ( SELECT 1 FROM plugin.users WHERE password = ? )",
                                 (resultSet, i) -> resultSet.getBoolean(1), new Object[] { password });
+        }
+
+        int setTflowToken(UUID userId, String token) {
+                return jdbcTemplate.update("CALL plugin.user_tflow_token_set(?, ?)", userId, token);
         }
 
         int deleteUser(UUID userId) {
