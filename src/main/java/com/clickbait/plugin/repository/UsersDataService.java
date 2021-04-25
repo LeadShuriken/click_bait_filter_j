@@ -62,10 +62,6 @@ public class UsersDataService {
                                 (resultSet, i) -> resultSet.getBoolean(1), new Object[] { password });
         }
 
-        int setTflowToken(UUID userId, String token) {
-                return jdbcTemplate.update("CALL plugin.user_tflow_token_set(?, ?)", userId, token);
-        }
-
         int deleteUser(UUID userId) {
                 return jdbcTemplate.update("DELETE FROM plugin.users WHERE user_id = ?", userId);
         }

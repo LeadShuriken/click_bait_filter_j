@@ -53,10 +53,6 @@ public class ApplicationDataService {
         return userDataService.deleteUser(userId);
     }
 
-    public int setTflowToken(UUID userId, String token) {
-        return userDataService.setTflowToken(userId, token);
-    }
-
     public int updateUser(UUID userId, User user) {
         Optional.ofNullable(user.getPassword()).ifPresent(password -> {
             boolean taken = userDataService.isPasswordTaken(password);

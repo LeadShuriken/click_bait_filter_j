@@ -8,7 +8,6 @@ import com.google.common.base.Strings;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.clickbait.plugin.dao.User;
 import com.clickbait.plugin.services.ApplicationUserService;
 
 import org.springframework.web.filter.OncePerRequestFilter;
