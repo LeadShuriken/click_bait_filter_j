@@ -1,7 +1,6 @@
 package com.clickbait.plugin.controllers;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.validation.Valid;
 
@@ -9,11 +8,9 @@ import com.clickbait.plugin.dao.User;
 import com.clickbait.plugin.dao.UserClick;
 import com.clickbait.plugin.dao.UserTab;
 import com.clickbait.plugin.repository.ApplicationDataService;
-import com.clickbait.plugin.security.AuthenticatedUser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,24 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/${api.version}")
-public class ApiTabsController {
+public class ApiAdminController {
 
     @Autowired
     private ApplicationDataService applicationDataService;
-
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('CLICKS_WRITE')")
-    @PostMapping(value = "${api.clicks_register}")
-    public String registerLink() {
-        UUID a = ((AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                .getUserId();
-        return a.toString();
-    }
-
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
-    @PostMapping(value = "${api.page_segmentation}")
-    public String fetchPageSegmentation() {
-        return "Hello Page Segmentation!";
-    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('CLICKS_READ')")
     @PostMapping(value = "${api.get_clicks}")

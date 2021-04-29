@@ -22,13 +22,13 @@ AS $$
 DECLARE ident CONSTANT plugin.id_type := plugin.id();
 BEGIN
     DELETE FROM plugin.tab WHERE user_id = tad_id AND index = index_p;
-    WITH ROWS AS (
+    WITH returnR AS (
         INSERT INTO plugin.domain (domain_id, name) VALUES (ident, name_p)
         ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name
         RETURNING plugin.domain.domain_id
     )
     INSERT INTO plugin.tab (user_id, domain_id, index) 
-    VALUES (tad_id, (SELECT domain_id FROM ROWS), index_p);
+    VALUES (tad_id, (SELECT domain_id FROM returnR), index_p);
     tad_id := ident;
     COMMIT;
 END;

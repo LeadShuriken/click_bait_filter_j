@@ -1,0 +1,1 @@
+SELECT plugin.insert_user('hala','JbctFonEY52ql7ww2sdJgAyQoRtvfp/mB7GKTKy52UJQOnQO1fwl5A==','ADMIN');

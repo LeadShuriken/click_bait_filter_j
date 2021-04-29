@@ -7,6 +7,13 @@ CREATE TABLE IF NOT EXISTS plugin.link (
     FOREIGN KEY (domain_id) REFERENCES plugin.domain (domain_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS plugin.link_predictions (
+    link_id plugin.id_type PRIMARY KEY,
+    bScore DECIMAL,
+    bScoreUpdated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (link_id) REFERENCES plugin.link (link_id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS plugin.click (
     click_id plugin.id_type DEFAULT plugin.id() PRIMARY KEY,
     link_id plugin.id_type NOT NULL,
@@ -26,12 +33,15 @@ LANGUAGE plpgsql
 AS $$
     DECLARE ident CONSTANT plugin.id_type := plugin.id();
 BEGIN
-    WITH ROWS AS (
+    WITH returnR AS (
         INSERT INTO plugin.link ( link_id, link, domain_id ) VALUES (ident, link_p, 
             (SELECT domain_id FROM plugin.domain WHERE name = domain_p))
-        ON CONFLICT (link) DO UPDATE SET count = plugin.link.count + 1 RETURNING plugin.link.link_id
+        ON CONFLICT (link) DO UPDATE SET
+        count = plugin.link.count + 1
+        RETURNING plugin.link.link_id
     )
-    INSERT INTO plugin.click ( link_id, user_id ) VALUES ((SELECT link_id FROM ROWS), user_id_p);
+    INSERT INTO plugin.link_predictions ( link_id ) VALUES ((SELECT link_id FROM returnR)) ON CONFLICT DO NOTHING;
+    INSERT INTO plugin.click ( link_id, user_id ) VALUES ((SELECT link_id FROM returnR), user_id_p);
     RETURN ident;
     COMMIT;
 EXCEPTION 
