@@ -41,6 +41,9 @@ BEGIN
         cred_expired = COALESCE(cred_expired_p, users.cred_expired) 
     WHERE user_id = user_id_p;
     COMMIT;
+EXCEPTION 
+  WHEN OTHERS THEN 
+    ROLLBACK;
 END;
 $$;
 
@@ -155,6 +158,9 @@ BEGIN
         END IF;
     END LOOP;
     COMMIT;
+EXCEPTION 
+  WHEN OTHERS THEN 
+    ROLLBACK;
 END;
 $$;
 
@@ -178,6 +184,9 @@ BEGIN
                 WHERE users.user_id = user_id_p));
     END LOOP;
     COMMIT;
+EXCEPTION 
+  WHEN OTHERS THEN 
+    ROLLBACK;
 END;
 $$;
 
@@ -222,5 +231,8 @@ BEGIN
         CALL plugin.add_privilege(user_id_p, privilege_p);
     END IF;
     COMMIT;
+EXCEPTION 
+  WHEN OTHERS THEN 
+    ROLLBACK;
 END;
 $$;

@@ -37,5 +37,8 @@ BEGIN
         END LOOP;
         COMMIT;
     END IF;
+EXCEPTION 
+  WHEN OTHERS THEN 
+    ROLLBACK;
 END;
 $$;

@@ -31,6 +31,9 @@ BEGIN
     VALUES (tad_id, (SELECT domain_id FROM returnR), index_p);
     tad_id := ident;
     COMMIT;
+EXCEPTION 
+  WHEN OTHERS THEN 
+    ROLLBACK;
 END;
 $$;
 

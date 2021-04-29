@@ -38,5 +38,8 @@ BEGIN
     UPDATE plugin.link_predictions SET bScore = bScore_p
     FROM plugin.link WHERE link_predictions.link_id = link.link_id;
     COMMIT;
+EXCEPTION 
+  WHEN OTHERS THEN 
+    ROLLBACK;
 END;
 $$;
