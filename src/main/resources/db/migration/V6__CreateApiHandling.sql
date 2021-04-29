@@ -7,7 +7,6 @@ LANGUAGE plpgsql
 AS $$
 DECLARE 
     linkF plugin.link_type;
-    bScoreF DECIMAL;
     domain_f plugin.id_type;
 
     ident plugin.id_type := plugin.id();
