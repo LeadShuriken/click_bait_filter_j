@@ -73,6 +73,7 @@ This application is an **GRADLE APPLICATION USING THE GRADLE WRAPPER**;
 ### Todos
 
  - Tests and Docs
+ - All stored procedures
  
   [JAVA11]: <https://www.oracle.com/java/technologies/javase-jdk11-downloads.html>
   [SPRING]: <https://spring.io>
