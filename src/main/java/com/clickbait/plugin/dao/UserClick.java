@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.validation.constraints.Past;
 
+import com.clickbait.plugin.annotations.SQLInjectionSafe;
 import com.clickbait.plugin.annotations.UUIDA;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,9 +17,11 @@ public class UserClick {
     @JsonProperty("userId")
     private final UUID userId;
 
+    @SQLInjectionSafe
     @JsonProperty("domain")
     private final String domain;
 
+    @SQLInjectionSafe
     @JsonProperty("link")
     private final String link;
 

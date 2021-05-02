@@ -1,6 +1,7 @@
 package com.clickbait.plugin.dao;
 
 import com.clickbait.plugin.annotations.UUIDA;
+import com.clickbait.plugin.annotations.SQLInjectionSafe;
 import com.clickbait.plugin.security.ApplicationUserRole;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,10 +21,12 @@ public class User {
     @JsonProperty("userId")
     private final UUID userId;
 
+    @SQLInjectionSafe
     @JsonProperty("name")
     @Size(max = 100, min = 1)
     private final String name;
 
+    @SQLInjectionSafe
     @JsonProperty("password")
     @Size(max = 200, min = 1)
     private final String password;

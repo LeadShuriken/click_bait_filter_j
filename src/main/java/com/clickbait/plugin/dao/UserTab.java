@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.validation.constraints.Min;
 
 import com.clickbait.plugin.annotations.UUIDA;
+import com.clickbait.plugin.annotations.SQLInjectionSafe;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,6 +24,7 @@ public class UserTab {
     @JsonProperty("userId")
     private final UUID userId;
 
+    @SQLInjectionSafe
     @JsonProperty("name")
     private final String name;
 
