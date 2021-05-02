@@ -11,7 +11,7 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Constraint(validatedBy = SQLInjectionSafeConstraintValidator.class)
+@Constraint(validatedBy = SQLInjectionSafeValidator.class)
 public @interface SQLInjectionSafe {
     String message() default "{SQLInjectionSafe}";
     Class<?>[] groups() default {};
