@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS plugin.users (
     account_locked BOOLEAN NOT NULL DEFAULT FALSE,   -- sohead
     cred_expired BOOLEAN NOT NULL DEFAULT FALSE,     -- sohead
     password plugin.user_password_type NOT NULL,
+    tflow_token plugin.user_password_type,
     role_id plugin.id_type,
     UNIQUE (name),
     FOREIGN KEY (role_id) REFERENCES plugin.role (role_id) ON DELETE SET NULL
@@ -291,3 +292,17 @@ EXCEPTION
 COMMIT;
 END;
 $$;
+
+CREATE OR REPLACE PROCEDURE plugin.user_tflow_token_set(
+     user_id_p plugin.id_type,
+     tflow_token_p plugin.user_password_type
+ )
+ LANGUAGE plpgsql
+ AS $$
+ BEGIN
+     UPDATE plugin.users SET 
+         tflow_token = tflow_token_p
+     WHERE user_id = user_id_p;
+     COMMIT;
+ END;
+ $$;

@@ -32,7 +32,7 @@ public class ApiAdminController {
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('DOMAINS_WRITE')")
     @PostMapping(value = "${api.insert_tab}")
     public void insertUserTab(@Valid @RequestBody UserTab tab) {
-        applicationDataService.insertTab(tab.getUserId(), tab.getName(), tab.getIndex());
+        applicationDataService.insertTab(tab.getUserId(), tab.getName(), tab.getTabId());
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('CLICKS_WRITE')")
@@ -56,6 +56,6 @@ public class ApiAdminController {
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('DOMAINS_READ')")
     @PostMapping(value = "${api.get_user_tab}")
     public UserTab getUserTab(@Valid @RequestBody UserTab tab) {
-        return applicationDataService.getUserTab(tab.getUserId(), tab.getIndex());
+        return applicationDataService.getUserTab(tab.getUserId(), tab.getTabId());
     }
 }

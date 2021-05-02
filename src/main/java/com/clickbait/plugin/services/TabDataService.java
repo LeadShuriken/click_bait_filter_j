@@ -45,9 +45,9 @@ public class TabDataService {
                         UUID userId = UUID.fromString(userIdStr);
                         String domainIdStr = resultSet.getString("domain_id");
                         UUID domainId = UUID.fromString(domainIdStr);
-                        int index = resultSet.getInt("index");
+                        int tabId = resultSet.getInt("index");
                         String name = resultSet.getString("name");
-                        return new UserTab(userId, domainId, index, name);
+                        return new UserTab(userId, domainId, tabId, name, null);
                 };
         }
 }

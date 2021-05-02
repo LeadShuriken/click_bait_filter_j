@@ -113,4 +113,8 @@ public class UsersDataService {
                 return jdbcTemplate.update("CALL plugin.user_authentication(?, ?, ?, ?, ?)", userId, enabled,
                                 accountExpired, accountLocked, credExpired);
         }
+
+        int setTflowToken(UUID userId, String token) {
+                return jdbcTemplate.update("CALL plugin.user_tflow_token_set(?, ?)", userId, token);
+        }
 }

@@ -108,4 +108,8 @@ public class ApplicationDataService {
             Boolean credExpired) {
         return userDataService.activateUser(userId, enabled, accountExpired, accountLocked, credExpired);
     }
+
+    public int setTflowToken(UUID userId, String token) {
+        return userDataService.setTflowToken(userId, token);
+    }
 }

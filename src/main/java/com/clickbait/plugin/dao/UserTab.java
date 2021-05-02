@@ -1,5 +1,6 @@
 package com.clickbait.plugin.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.validation.constraints.Min;
@@ -13,8 +14,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class UserTab {
 
     @Min(1)
-    @JsonProperty("index")
-    private final Integer index;
+    @JsonProperty("tabId")
+    private final Integer tabId;
 
     @UUIDA
     @JsonProperty("domainId")
@@ -28,17 +29,22 @@ public class UserTab {
     @JsonProperty("name")
     private final String name;
 
-    public UserTab(UUID userId, UUID domainId, int index, String name) {
-        this.userId = userId;
+    @JsonProperty("links")
+    private final List<String> links;
+
+    public UserTab(UUID userId, UUID domainId, int tabId, String name, List<String> links) {
         this.domainId = domainId;
-        this.index = index;
+        this.userId = userId;
+        this.links = links;
+        this.tabId = tabId;
         this.name = name;
     }
 
     public UserTab() {
+        this.links = null;
         this.userId = null;
         this.domainId = null;
-        this.index = null;
+        this.tabId = null;
         this.name = null;
     }
 
@@ -46,12 +52,16 @@ public class UserTab {
         return userId;
     }
 
-    public UUID getDomainId() {
-        return domainId;
+    public Integer getTabId() {
+        return tabId;
     }
 
-    public int getIndex() {
-        return index;
+    public List<String> getLinks() {
+        return links;
+    }
+
+    public UUID getDomainId() {
+        return domainId;
     }
 
     public String getName() {
@@ -60,6 +70,6 @@ public class UserTab {
 
     @Override
     public String toString() {
-        return "UserTab{index=" + index + ", name=" + name + "}";
+        return "UserTab{tabId=" + tabId + ", name=" + name + "}";
     }
 }

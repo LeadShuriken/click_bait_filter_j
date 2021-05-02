@@ -22,6 +22,7 @@ import io.jsonwebtoken.security.Keys;
 @ConfigurationProperties(prefix = "encryption")
 public class EncryptionHandlers {
 
+    private String tflowToken;
     private String tokenPrefix;
     private String authHeader;
     private String adminNameHeader;
@@ -32,6 +33,14 @@ public class EncryptionHandlers {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String getTflowToken() {
+        return tflowToken;
+    }
+
+    public void setTflowToken(String tflowToken) {
+        this.tflowToken = tflowToken;
     }
 
     public Date extractExpiration(String token) {
@@ -84,13 +93,20 @@ public class EncryptionHandlers {
         return pbkdf2PasswordEncoder.encode(password);
     }
 
+    public String pbkdf2Hash(String password, String salt) {
+        Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(salt, pbkdf2Config.getIterations(),
+                pbkdf2Config.getHashWidth());
+        pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
+        return pbkdf2PasswordEncoder.encode(password);
+    }
+
     public Boolean pbkdf2Matches(String row, String encoded) {
         Pbkdf2PasswordEncoder pbkdf2PasswordEncoder = new Pbkdf2PasswordEncoder(passwordEncoder.getSalt(),
                 pbkdf2Config.getIterations(), pbkdf2Config.getHashWidth());
         pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
         return pbkdf2PasswordEncoder.matches(row, encoded);
     }
-
+    
     public String getTokenPrefix() {
         return tokenPrefix;
     }
