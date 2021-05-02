@@ -4,12 +4,15 @@ import com.clickbait.plugin.annotations.UUIDA;
 import com.clickbait.plugin.security.ApplicationUserRole;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.validation.constraints.Size;
 
 import java.util.List;
 import java.util.UUID;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 
@@ -81,6 +84,18 @@ public class User {
         this.credExpired = credExpired;
     }
 
+    public User(UUID userId, String name, ApplicationUserRole role, List<ApplicationUserPrivilege> privileges) {
+        this.userId = userId;
+        this.name = name;
+        this.privileges = privileges;
+        this.role = role;
+        this.enabled = null;
+        this.password = null;
+        this.accountExpired = null;
+        this.accountLocked = null;
+        this.credExpired = null;
+    }
+
     public Boolean getEnabled() {
         return enabled;
     }
@@ -119,7 +134,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{name=" + name + ", password=" + password + ", role=" + getRole().name() + ", privileges="
-                + privileges + "}";
+        return "User{userId=" + userId + ",name=" + name + ", password=" + password + ", role=" + getRole().name()
+                + ", privileges=" + privileges + "}";
     }
 }

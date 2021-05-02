@@ -1,4 +1,4 @@
-package com.clickbait.plugin.repository;
+package com.clickbait.plugin.services;
 
 import com.clickbait.plugin.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;

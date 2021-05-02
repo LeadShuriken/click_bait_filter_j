@@ -1,9 +1,6 @@
 package com.clickbait.plugin.services;
 
-import java.util.UUID;
-
 import com.clickbait.plugin.dao.User;
-import com.clickbait.plugin.repository.ApplicationDataService;
 import com.clickbait.plugin.security.ApplicationUserRole;
 import com.clickbait.plugin.security.AuthenticatedUser;
 
@@ -17,30 +14,30 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApplicationUserService implements UserDetailsService {
 
-    private final ApplicationDataService applicationDao;
+    private final UsersDataService usersDataService;
 
     @Override
     public AuthenticatedUser loadUserByUsername(String username) throws UsernameNotFoundException {
-        return new AuthenticatedUser(applicationDao.getUser(username));
+        return new AuthenticatedUser(usersDataService.getServiceUser(null, username, null));
     }
 
     @Autowired
-    public ApplicationUserService(ApplicationDataService userService) {
-        this.applicationDao = userService;
+    public ApplicationUserService(UsersDataService usersDataService) {
+        this.usersDataService = usersDataService;
     }
 
     public UserDetails loadOrCreateUserByUsernamePassword(String username, String password) {
         User a = null;
         try {
-            a = applicationDao.getUser(username, password);
+            a = usersDataService.getServiceUser(null, username, password);
         } catch (EmptyResultDataAccessException e) {
-            UUID newUserId = applicationDao.addNewUser(username, password, ApplicationUserRole.USER);
-            a = applicationDao.getUser(newUserId);
+            a = usersDataService.getServiceUser(
+                    usersDataService.insertUser(username, password, ApplicationUserRole.USER.name()), null, null);
         }
         return new AuthenticatedUser(a);
     }
 
     public UserDetails loadUserByUsernamePassword(String username, String password) {
-        return new AuthenticatedUser(applicationDao.getUser(username, password));
+        return new AuthenticatedUser(usersDataService.getServiceUser(null, username, password));
     }
 }

@@ -30,10 +30,10 @@ BEGIN
     INSERT INTO plugin.tab (user_id, domain_id, index) 
     VALUES (tad_id, (SELECT domain_id FROM returnR), index_p);
     tad_id := ident;
-    COMMIT;
 EXCEPTION 
   WHEN OTHERS THEN 
-    ROLLBACK;
+  ROLLBACK;
+COMMIT;
 END;
 $$;
 
@@ -54,5 +54,19 @@ BEGIN
     SELECT tab.user_id, tab.domain_id, tab.index, domain.name
     FROM plugin.tab AS tab INNER JOIN plugin.domain USING (domain_id)
     WHERE tab.user_id = user_id_p AND tab.index = index_p;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION plugin.get_tabs(
+    user_id_p plugin.id_type
+)
+RETURNS SETOF plugin.tabs_response
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT user_id, domain_id, domain.name AS name, index  
+    FROM plugin.tab JOIN plugin.domain AS domain USING (domain_id)
+    WHERE (user_id_p IS NULL OR user_id = user_id_p);
 END;
 $$;

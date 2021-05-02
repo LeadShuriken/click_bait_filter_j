@@ -28,7 +28,7 @@ DO $$ BEGIN
         'DOMAINS_READ',
         'DOMAINS_WRITE'
     );
-    CREATE TYPE plugin.users_response AS (
+    CREATE TYPE plugin.user_response AS (
         user_id plugin.id_type,
         name plugin.user_name_type,
         password plugin.user_password_type,
@@ -38,6 +38,18 @@ DO $$ BEGIN
         account_expired BOOLEAN,  
         account_locked BOOLEAN,   
         cred_expired BOOLEAN
+    );
+    CREATE TYPE plugin.users_response AS (
+        user_id plugin.id_type,
+        name plugin.user_name_type,
+        role plugin.user_role_type,
+        privileges TEXT[]
+    );
+    CREATE TYPE plugin.tabs_response AS (
+        user_id plugin.id_type,
+        domain_id plugin.id_type,
+        name plugin.domain_name_type,
+        index INTEGER
     );
 EXCEPTION
     WHEN duplicate_object THEN null;

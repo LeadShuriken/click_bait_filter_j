@@ -7,7 +7,7 @@ import javax.validation.Valid;
 import com.clickbait.plugin.dao.User;
 import com.clickbait.plugin.dao.UserClick;
 import com.clickbait.plugin.dao.UserTab;
-import com.clickbait.plugin.repository.ApplicationDataService;
+import com.clickbait.plugin.services.ApplicationDataService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

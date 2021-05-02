@@ -40,10 +40,10 @@ BEGIN
         account_locked = COALESCE(account_locked_p, users.account_locked),   
         cred_expired = COALESCE(cred_expired_p, users.cred_expired) 
     WHERE user_id = user_id_p;
-    COMMIT;
 EXCEPTION 
   WHEN OTHERS THEN 
-    ROLLBACK;
+  ROLLBACK;
+COMMIT;
 END;
 $$;
 
@@ -80,6 +80,10 @@ BEGIN
          WHERE priv_p.name = priv AND role_f.name = role_p));
     END LOOP;
     RETURN ident;
+EXCEPTION 
+  WHEN OTHERS THEN 
+  ROLLBACK;
+COMMIT;
 END;
 $$;
 
@@ -90,13 +94,8 @@ AS $$
 BEGIN
     RETURN QUERY
     SELECT 
-        users.user_id, users.name,
-        users.password, role.name as role,
-        ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges,
-        users.enabled,
-        users.account_expired,
-        users.account_locked,
-        users.cred_expired
+        users.user_id, users.name, role.name as role,
+        ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges
     FROM plugin.users 
     INNER JOIN plugin.role USING (role_id)
     LEFT JOIN plugin.user_privilege USING (user_id)
@@ -105,19 +104,75 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION plugin.is_password_taken(
+    password_p plugin.user_password_type
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+AS $$
+DECLARE there BOOLEAN;
+BEGIN
+    SELECT EXISTS ( SELECT 1 FROM plugin.users WHERE password = password_p ) INTO there;
+    RETURN there;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE plugin.delete_user(
+    user_id_p plugin.id_type
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  DELETE FROM plugin.users WHERE user_id = user_id_p;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE plugin.update_password(
+    user_id_p plugin.id_type,
+    password_p plugin.user_password_type
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE plugin.users SET password = password_p WHERE user_id = user_id_p;
+EXCEPTION 
+  WHEN OTHERS THEN 
+  ROLLBACK;
+COMMIT;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE plugin.update_name(
+    user_id_p plugin.id_type,
+    name_p plugin.user_name_type
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE plugin.users SET name = name_p WHERE user_id = user_id_p;
+EXCEPTION 
+  WHEN OTHERS THEN 
+  ROLLBACK;
+COMMIT;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION plugin.get_user(
     user_id_p plugin.id_type,
     name_p plugin.user_name_type,
-    password_p plugin.user_password_type
+    password_p plugin.user_password_type,
+    password_pass BOOLEAN DEFAULT FALSE
 )
-RETURNS SETOF plugin.users_response
+RETURNS SETOF plugin.user_response
 LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
     SELECT 
         users.user_id, users.name,
-        users.password, role.name as role,
+        (CASE WHEN password_pass 
+        THEN users.password END)::plugin.user_password_type 
+        AS password, role.name as role,
         ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges,
         users.enabled,
         users.account_expired,
@@ -157,10 +212,10 @@ BEGIN
             ON CONFLICT DO NOTHING;
         END IF;
     END LOOP;
-    COMMIT;
 EXCEPTION 
   WHEN OTHERS THEN 
-    ROLLBACK;
+  ROLLBACK;
+COMMIT;
 END;
 $$;
 
@@ -183,10 +238,10 @@ BEGIN
                 INNER JOIN plugin.role USING (role_id)
                 WHERE users.user_id = user_id_p));
     END LOOP;
-    COMMIT;
 EXCEPTION 
   WHEN OTHERS THEN 
-    ROLLBACK;
+  ROLLBACK;
+COMMIT;
 END;
 $$;
 
@@ -215,10 +270,10 @@ BEGIN
         USING (role_id) WHERE user_id = user_id_p;
         IF role_p != cur_role_type THEN
             DELETE FROM plugin.user_privilege WHERE user_privilege.user_id = user_id_p;
-            UPDATE plugin.users SET role_id = (SELECT role_id FROM plugin.role WHERE role.name = role_p);
+            UPDATE plugin.users SET role_id = (SELECT role_id FROM plugin.role WHERE role.name = role_p)
+            WHERE user_id = user_id_p;
             EXECUTE 'SELECT enum_range(NULL::plugin.' || LOWER(role_p::text) || '_privileges)' INTO temp;
             FOREACH priv IN ARRAY temp LOOP
-                RAISE NOTICE 'value of a : %', priv;
                 INSERT INTO plugin.user_privilege (user_id, privilege_id) VALUES (user_id_p, 
                 (SELECT privilege_id FROM plugin.privilege AS priv_p 
                 INNER JOIN plugin.role AS role_f USING (role_id)
@@ -230,9 +285,9 @@ BEGIN
         DELETE FROM plugin.user_privilege WHERE user_id = user_id_p;
         CALL plugin.add_privilege(user_id_p, privilege_p);
     END IF;
-    COMMIT;
 EXCEPTION 
   WHEN OTHERS THEN 
-    ROLLBACK;
+  ROLLBACK;
+COMMIT;
 END;
 $$;

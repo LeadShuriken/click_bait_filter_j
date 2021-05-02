@@ -2,8 +2,8 @@ package com.clickbait.plugin.controllers;
 
 import java.util.UUID;
 
-import com.clickbait.plugin.repository.ApplicationDataService;
 import com.clickbait.plugin.security.AuthenticatedUser;
+import com.clickbait.plugin.services.ApplicationDataService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS plugin.link (
 
 CREATE TABLE IF NOT EXISTS plugin.link_predictions (
     link_id plugin.id_type PRIMARY KEY,
-    bScore DECIMAL,
+    bScore DECIMAL DEFAULT NULL,
     bScoreUpdated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (link_id) REFERENCES plugin.link (link_id) ON DELETE CASCADE
 );
@@ -31,7 +31,7 @@ CREATE OR REPLACE FUNCTION plugin.add_click(
 RETURNS plugin.id_type 
 LANGUAGE plpgsql
 AS $$
-    DECLARE ident CONSTANT plugin.id_type := plugin.id();
+    DECLARE ident plugin.id_type := plugin.id();
 BEGIN
     WITH returnR AS (
         INSERT INTO plugin.link ( link_id, link, domain_id ) VALUES (ident, link_p, 
@@ -40,13 +40,15 @@ BEGIN
         count = plugin.link.count + 1
         RETURNING plugin.link.link_id
     )
-    INSERT INTO plugin.link_predictions ( link_id ) VALUES ((SELECT link_id FROM returnR)) ON CONFLICT DO NOTHING;
-    INSERT INTO plugin.click ( link_id, user_id ) VALUES ((SELECT link_id FROM returnR), user_id_p);
+    SELECT COALESCE((SELECT link_id FROM returnR), ident) INTO ident;
+
+    INSERT INTO plugin.link_predictions ( link_id ) VALUES (ident) ON CONFLICT DO NOTHING;
+    INSERT INTO plugin.click ( link_id, user_id ) VALUES (ident, user_id_p);
     RETURN ident;
-    COMMIT;
 EXCEPTION 
   WHEN OTHERS THEN 
-    ROLLBACK;
+  ROLLBACK;
+COMMIT;
 END;
 $$;
 

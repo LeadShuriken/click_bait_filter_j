@@ -1,4 +1,4 @@
-package com.clickbait.plugin.repository;
+package com.clickbait.plugin.services;
 
 import com.clickbait.plugin.dao.*;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
@@ -28,8 +28,13 @@ public class UsersDataService {
         }
 
         User getUser(UUID id, String name, String password) {
-                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?, ?)", mapUsersFomDb(),
+                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?, ?)", mapUserFomDb(),
                                 new Object[] { id, name, password });
+        }
+
+        User getServiceUser(UUID id, String name, String password) {
+                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_user(?, ?, ?, ?)", mapUserFomDb(),
+                                new Object[] { id, name, password, true });
         }
 
         UUID insertUser(String name, String password, String role) {
@@ -39,6 +44,19 @@ public class UsersDataService {
         }
 
         private RowMapper<User> mapUsersFomDb() {
+                return (resultSet, i) -> {
+                        String userIdStr = resultSet.getString("user_id");
+                        UUID userId = UUID.fromString(userIdStr);
+                        String name = resultSet.getString("name");
+                        String role = resultSet.getString("role");
+                        List<ApplicationUserPrivilege> privileges = Arrays
+                                        .stream((String[]) resultSet.getArray("privileges").getArray())
+                                        .map(ApplicationUserPrivilege::valueOf).collect(Collectors.toList());
+                        return new User(userId, name, ApplicationUserRole.valueOf(role), privileges);
+                };
+        }
+
+        private RowMapper<User> mapUserFomDb() {
                 return (resultSet, i) -> {
                         String userIdStr = resultSet.getString("user_id");
                         UUID userId = UUID.fromString(userIdStr);
@@ -58,24 +76,20 @@ public class UsersDataService {
         }
 
         boolean isPasswordTaken(String password) {
-                return jdbcTemplate.queryForObject("SELECT EXISTS ( SELECT 1 FROM plugin.users WHERE password = ? )",
+                return jdbcTemplate.queryForObject("SELECT * FROM plugin.is_password_taken(?)",
                                 (resultSet, i) -> resultSet.getBoolean(1), new Object[] { password });
         }
 
         int deleteUser(UUID userId) {
-                return jdbcTemplate.update("DELETE FROM plugin.users WHERE user_id = ?", userId);
+                return jdbcTemplate.update("CALL plugin.delete_user(?)", userId);
         }
 
         int updatePassword(UUID userId, String password) {
-                return jdbcTemplate.update("UPDATE plugin.users SET password = ? WHERE user_id = ?", password, userId);
+                return jdbcTemplate.update("CALL plugin.update_password(?,?)", userId, password);
         }
 
         int updateName(UUID userId, String name) {
-                return jdbcTemplate.update("UPDATE plugin.users SET name = ? WHERE user_id = ?", name, userId);
-        }
-
-        int updateRole(UUID userId, String role) {
-                return jdbcTemplate.update("UPDATE plugin.role SET name = ? WHERE role_id = ?", role, userId);
+                return jdbcTemplate.update("CALL plugin.update_name(?,?)", userId, name);
         }
 
         int updateUser(UUID userId, String name, String password, String role, String[] privileges) {
@@ -98,10 +112,5 @@ public class UsersDataService {
                         Boolean credExpired) {
                 return jdbcTemplate.update("CALL plugin.user_authentication(?, ?, ?, ?, ?)", userId, enabled,
                                 accountExpired, accountLocked, credExpired);
-        }
-
-        boolean isUserActive(UUID userId) {
-                return jdbcTemplate.queryForObject("SELECT enabled FROM plugin.users WHERE user_id = ?",
-                                (resultSet, i) -> resultSet.getBoolean(1), new Object[] { userId });
         }
 }

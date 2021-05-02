@@ -1,8 +1,8 @@
 package com.clickbait.plugin.controllers;
 
-import com.clickbait.plugin.repository.ApplicationDataService;
 import com.clickbait.plugin.security.ApplicationUserRole;
 import com.clickbait.plugin.security.EncryptionHandlers;
+import com.clickbait.plugin.services.ApplicationDataService;
 
 import java.util.List;
 
@@ -31,12 +31,6 @@ public class ApiUserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "${api.login_admin}")
     public void loginAdmin() {
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_READ')")
-    @PostMapping(value = "${api.is_active}")
-    public boolean isActive(@Valid @RequestBody User user) {
-        return applicationDataService.isUserActive(user.getUserId());
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('USERS_READ')")

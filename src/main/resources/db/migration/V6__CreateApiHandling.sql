@@ -35,10 +35,10 @@ BEGIN
             VALUES ((SELECT link_id FROM returnL), bScores_p[iterator]) 
             ON CONFLICT (link_id) DO UPDATE SET bScore=bScores_p[iterator];
         END LOOP;
-        COMMIT;
     END IF;
 EXCEPTION 
   WHEN OTHERS THEN 
-    ROLLBACK;
+  ROLLBACK;
+COMMIT;
 END;
 $$;

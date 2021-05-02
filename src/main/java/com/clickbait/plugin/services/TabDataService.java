@@ -1,4 +1,4 @@
-package com.clickbait.plugin.repository;
+package com.clickbait.plugin.services;
 
 import com.clickbait.plugin.dao.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +20,12 @@ public class TabDataService {
         }
 
         List<UserTab> getAllTabs() {
-                return jdbcTemplate.query(
-                                "SELECT user_id, domain_id, index, domain.name AS name FROM plugin.tab JOIN plugin.domain AS domain USING (domain_id)",
-                                mapTabsFomDb());
+                return jdbcTemplate.query("SELECT * FROM plugin.get_tabs(null)", mapTabsFomDb());
         }
 
         List<UserTab> getUserTabs(UUID userId) {
-                return jdbcTemplate.query(
-                                "SELECT user_id, domain_id, index, domain.name AS name FROM plugin.tab JOIN plugin.domain AS domain USING (domain_id)"
-                                                + " WHERE user_id = ?",
-                                mapTabsFomDb(), new Object[] { userId });
+                return jdbcTemplate.query("SELECT * FROM plugin.get_tabs(?)", mapTabsFomDb(),
+                                new Object[] { userId });
         }
 
         UserTab getUserTab(UUID userId, int index) {

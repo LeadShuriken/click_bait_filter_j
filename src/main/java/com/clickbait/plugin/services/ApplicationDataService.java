@@ -1,4 +1,4 @@
-package com.clickbait.plugin.repository;
+package com.clickbait.plugin.services;
 
 import com.clickbait.plugin.dao.*;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
@@ -107,9 +107,5 @@ public class ApplicationDataService {
     public int activateUser(UUID userId, Boolean enabled, Boolean accountExpired, Boolean accountLocked,
             Boolean credExpired) {
         return userDataService.activateUser(userId, enabled, accountExpired, accountLocked, credExpired);
-    }
-
-    public Boolean isUserActive(UUID userId) {
-        return userDataService.isUserActive(userId);
     }
 }
