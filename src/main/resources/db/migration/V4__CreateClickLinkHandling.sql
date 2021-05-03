@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS plugin.link (
     link plugin.link_type UNIQUE NOT NULL,
     count BIGINT CHECK (count >= 1) DEFAULT 1,
     last_clicked TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    score DECIMAL DEFAULT 0.0, -- THE BENEFIT OF A DOUBT
     FOREIGN KEY (domain_id) REFERENCES plugin.domain (domain_id) ON DELETE CASCADE
 );
 

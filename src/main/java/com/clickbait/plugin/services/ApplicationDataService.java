@@ -7,6 +7,8 @@ import com.clickbait.plugin.security.ApplicationUserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +26,11 @@ public class ApplicationDataService {
         this.clickDataService = clickDataService;
         this.userDataService = userDataService;
         this.tabDataService = tabDataService;
+    }
+
+    public String extractHostname(String url) throws URISyntaxException {
+        String domain = new URI(url).getHost();
+        return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
 
     public List<User> getAllUsers() {

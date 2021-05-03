@@ -21,8 +21,7 @@ public class AllowedUrlsFilter extends ClickBaitPluginFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         if (!request.getRequestURI().matches(allowed) || !request.getMethod().equalsIgnoreCase("POST")) {
-            throw new RuntimeException(
-                    String.format("%s, %s is no allowed", request.getRequestURI(), request.getMethod()));
+            throw new RuntimeException("Endpoint not allowed");
         } else {
             filterChain.doFilter(request, response);
         }

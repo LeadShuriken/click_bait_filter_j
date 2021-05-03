@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS plugin.tab (
 
 CREATE OR REPLACE PROCEDURE plugin.insert_tab(
     tad_id INOUT plugin.id_type, 
-    name_p IN plugin.domain_name_type, 
+    name_p IN plugin.domain_name_type,
     index_p IN INTEGER
 )
 LANGUAGE plpgsql
@@ -42,18 +42,22 @@ CREATE OR REPLACE FUNCTION plugin.get_tab_data(
     index_p INTEGER
 )
 RETURNS TABLE (
-    user_id plugin.id_type,
-    domain_id plugin.id_type,
     index INTEGER,
-    name plugin.domain_name_type
+    name plugin.domain_name_type,
+    links plugin.link_score[]
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT tab.user_id, tab.domain_id, tab.index, domain.name
-    FROM plugin.tab AS tab INNER JOIN plugin.domain USING (domain_id)
-    WHERE tab.user_id = user_id_p AND tab.index = index_p;
+    SELECT
+        tab.index, domain.name,
+        ARRAY_AGG((link.link, link.score)::plugin.link_score) AS links
+    FROM plugin.tab AS tab 
+    INNER JOIN plugin.domain USING (domain_id)
+    LEFT JOIN plugin.link USING (domain_id)
+    WHERE tab.user_id = user_id_p AND tab.index = index_p
+    GROUP BY tab.index, domain.name;
 END;
 $$;
 
@@ -65,7 +69,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT user_id, domain_id, domain.name AS name, index  
+    SELECT domain.name AS name, index  
     FROM plugin.tab JOIN plugin.domain AS domain USING (domain_id)
     WHERE (user_id_p IS NULL OR user_id = user_id_p);
 END;

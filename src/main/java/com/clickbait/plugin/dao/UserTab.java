@@ -8,9 +8,11 @@ import javax.validation.constraints.Min;
 import com.clickbait.plugin.annotations.UUIDA;
 import com.clickbait.plugin.annotations.SQLInjectionSafe;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserTab {
 
     @Min(1)
@@ -30,11 +32,19 @@ public class UserTab {
     private final String name;
 
     @JsonProperty("links")
-    private final List<String> links;
+    private final List<Link> links;
 
-    public UserTab(UUID userId, UUID domainId, int tabId, String name, List<String> links) {
+    public UserTab(UUID userId, UUID domainId, int tabId, String name, List<Link> links) {
         this.domainId = domainId;
         this.userId = userId;
+        this.links = links;
+        this.tabId = tabId;
+        this.name = name;
+    }
+
+    public UserTab(int tabId, String name, List<Link> links) {
+        this.domainId = null;
+        this.userId = null;
         this.links = links;
         this.tabId = tabId;
         this.name = name;
@@ -56,7 +66,7 @@ public class UserTab {
         return tabId;
     }
 
-    public List<String> getLinks() {
+    public List<Link> getLinks() {
         return links;
     }
 

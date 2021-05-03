@@ -96,7 +96,7 @@ BEGIN
     RETURN QUERY
     SELECT 
         users.user_id, users.name, role.name as role,
-        ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges
+        ARRAY_AGG(privilege.name::text) AS privileges
     FROM plugin.users 
     INNER JOIN plugin.role USING (role_id)
     LEFT JOIN plugin.user_privilege USING (user_id)
@@ -174,7 +174,7 @@ BEGIN
         (CASE WHEN password_pass 
         THEN users.password END)::plugin.user_password_type 
         AS password, role.name as role,
-        ARRAY_REMOVE(ARRAY_AGG(privilege.name::text), NULL) AS privileges,
+        ARRAY_AGG(privilege.name::text) AS privileges,
         users.enabled,
         users.account_expired,
         users.account_locked,

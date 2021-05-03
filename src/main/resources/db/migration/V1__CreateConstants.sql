@@ -46,10 +46,12 @@ DO $$ BEGIN
         privileges TEXT[]
     );
     CREATE TYPE plugin.tabs_response AS (
-        user_id plugin.id_type,
-        domain_id plugin.id_type,
         name plugin.domain_name_type,
         index INTEGER
+    );
+    CREATE TYPE plugin.link_score AS (
+        link plugin.link_type,
+        score DECIMAL
     );
 EXCEPTION
     WHEN duplicate_object THEN null;

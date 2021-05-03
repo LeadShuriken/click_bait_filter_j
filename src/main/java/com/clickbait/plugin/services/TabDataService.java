@@ -6,8 +6,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class TabDataService {
@@ -24,12 +27,11 @@ public class TabDataService {
         }
 
         List<UserTab> getUserTabs(UUID userId) {
-                return jdbcTemplate.query("SELECT * FROM plugin.get_tabs(?)", mapTabsFomDb(),
-                                new Object[] { userId });
+                return jdbcTemplate.query("SELECT * FROM plugin.get_tabs(?)", mapTabsFomDb(), new Object[] { userId });
         }
 
         UserTab getUserTab(UUID userId, int index) {
-                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_tab_data(?, ?)", mapTabsFomDb(),
+                return jdbcTemplate.queryForObject("SELECT * FROM plugin.get_tab_data(?, ?)", mapTabFomDb(),
                                 new Object[] { userId, index });
         }
 
@@ -39,15 +41,21 @@ public class TabDataService {
                                 new Object[] { userId, name, index });
         }
 
-        private RowMapper<UserTab> mapTabsFomDb() {
+        private RowMapper<UserTab> mapTabFomDb() {
                 return (resultSet, i) -> {
-                        String userIdStr = resultSet.getString("user_id");
-                        UUID userId = UUID.fromString(userIdStr);
-                        String domainIdStr = resultSet.getString("domain_id");
-                        UUID domainId = UUID.fromString(domainIdStr);
                         int tabId = resultSet.getInt("index");
                         String name = resultSet.getString("name");
-                        return new UserTab(userId, domainId, tabId, name, null);
+                        List<Link> links = Arrays.stream((Object[]) resultSet.getArray("links").getArray())
+                                        .map(Link::valueOf).collect(Collectors.toList());
+                        return new UserTab(tabId, name, links);
+                };
+        }
+
+        private RowMapper<UserTab> mapTabsFomDb() {
+                return (resultSet, i) -> {
+                        int tabId = resultSet.getInt("index");
+                        String name = resultSet.getString("name");
+                        return new UserTab(tabId, name, null);
                 };
         }
 }
