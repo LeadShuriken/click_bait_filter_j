@@ -10,6 +10,7 @@ import com.clickbait.plugin.annotations.UUIDA;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Strings;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -81,7 +82,10 @@ public class UserClick {
 
     public static UserClick valueOf(Object a) {
         String[] b = a.toString().replaceAll(reg, "").split(",");
-        return new UserClick(b[0], Float.valueOf(b[1]));
+        if (b.length == 2 && !Strings.isNullOrEmpty(b[0]) && !Strings.isNullOrEmpty(b[1])) {
+            return new UserClick(b[0], Float.valueOf(b[1]));
+        }
+        return null;
     }
 
     @Override

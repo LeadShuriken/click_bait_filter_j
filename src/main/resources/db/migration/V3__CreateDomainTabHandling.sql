@@ -55,8 +55,8 @@ BEGIN
         ARRAY_AGG((link.link, link_predictions.bScore)::plugin.link_score) AS links
     FROM plugin.tab AS tab 
     INNER JOIN plugin.domain USING (domain_id)
-    INNER JOIN plugin.link USING (domain_id)
-    INNER JOIN plugin.link_predictions USING (link_id)
+    LEFT JOIN plugin.link USING (domain_id)
+    LEFT JOIN plugin.link_predictions USING (link_id)
     WHERE tab.user_id = user_id_p AND tab.index = index_p
     GROUP BY tab.index, domain.name;
 END;
