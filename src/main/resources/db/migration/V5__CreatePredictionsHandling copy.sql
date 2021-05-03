@@ -30,7 +30,7 @@ EXECUTE PROCEDURE plugin.link_last_clicked();
 
 CREATE OR REPLACE PROCEDURE plugin.update_link_predictions(
     link_p plugin.link_type,
-    bScore_p DECIMAL
+    bScore_p plugin.bait_score
 )
 LANGUAGE plpgsql
 AS $$

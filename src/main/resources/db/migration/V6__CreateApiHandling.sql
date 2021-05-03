@@ -1,7 +1,7 @@
 CREATE OR REPLACE PROCEDURE plugin.create_page_model(
     domain_p plugin.domain_name_type,
     links_p plugin.link_type[],
-    bScores_p DECIMAL[]
+    bScores_p plugin.bait_score[]
 )
 LANGUAGE plpgsql
 AS $$

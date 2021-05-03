@@ -8,10 +8,13 @@ import javax.validation.constraints.Past;
 import com.clickbait.plugin.annotations.SQLInjectionSafe;
 import com.clickbait.plugin.annotations.UUIDA;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserClick {
+    private final static String reg = "\\)|\\(";
 
     @UUIDA
     @JsonProperty("userId")
@@ -29,18 +32,35 @@ public class UserClick {
     @JsonProperty("atTime")
     private final LocalDate atTime;
 
-    public UserClick(UUID userId, String domain, String link, LocalDate atTime) {
+    @JsonProperty("score")
+    private final Float score;
+
+    public UserClick(UUID userId, String domain, String link, LocalDate atTime, Float score) {
         this.userId = userId;
+        this.score = score;
         this.domain = domain;
         this.link = link;
         this.atTime = atTime;
     }
 
+    public UserClick(String link, Float score) {
+        this.score = score;
+        this.link = link;
+        this.userId = null;
+        this.domain = null;
+        this.atTime = null;
+    }
+
     public UserClick() {
+        this.score = null;
         this.userId = null;
         this.domain = null;
         this.link = null;
         this.atTime = null;
+    }
+
+    public Float getScore() {
+        return score;
     }
 
     public UUID getUserId() {
@@ -57,6 +77,11 @@ public class UserClick {
 
     public LocalDate getAtTime() {
         return atTime;
+    }
+
+    public static UserClick valueOf(Object a) {
+        String[] b = a.toString().replaceAll(reg, "").split(",");
+        return new UserClick(b[0], Float.valueOf(b[1]));
     }
 
     @Override

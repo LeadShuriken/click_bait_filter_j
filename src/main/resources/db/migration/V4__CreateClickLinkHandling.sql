@@ -4,13 +4,12 @@ CREATE TABLE IF NOT EXISTS plugin.link (
     link plugin.link_type UNIQUE NOT NULL,
     count BIGINT CHECK (count >= 1) DEFAULT 1,
     last_clicked TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    score DECIMAL DEFAULT 0.0, -- THE BENEFIT OF A DOUBT
     FOREIGN KEY (domain_id) REFERENCES plugin.domain (domain_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS plugin.link_predictions (
     link_id plugin.id_type PRIMARY KEY,
-    bScore DECIMAL DEFAULT NULL,
+    bScore plugin.bait_score DEFAULT NULL,
     bScoreUpdated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (link_id) REFERENCES plugin.link (link_id) ON DELETE CASCADE
 );
@@ -27,7 +26,8 @@ CREATE TABLE IF NOT EXISTS plugin.click (
 CREATE OR REPLACE FUNCTION plugin.add_click(
     user_id_p plugin.id_type,
     domain_p plugin.domain_name_type,
-    link_p plugin.link_type
+    link_p plugin.link_type,
+    score_p plugin.bait_score 
 )
 RETURNS plugin.id_type 
 LANGUAGE plpgsql
@@ -43,8 +43,9 @@ BEGIN
     )
     SELECT COALESCE((SELECT link_id FROM returnR), ident) INTO ident;
 
-    INSERT INTO plugin.link_predictions ( link_id ) VALUES (ident) ON CONFLICT DO NOTHING;
-    INSERT INTO plugin.click ( link_id, user_id ) VALUES (ident, user_id_p);
+    INSERT INTO plugin.link_predictions (link_id, bScore) VALUES (ident, score_p) 
+    ON CONFLICT (link_id) DO UPDATE SET bScore = score_p;
+    INSERT INTO plugin.click (link_id, user_id) VALUES (ident, user_id_p);
     RETURN ident;
 EXCEPTION 
   WHEN OTHERS THEN 

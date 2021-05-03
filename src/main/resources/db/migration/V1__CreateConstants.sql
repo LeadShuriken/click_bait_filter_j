@@ -3,6 +3,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 DO $$ BEGIN
     CREATE DOMAIN plugin.id_type UUID;
+    CREATE DOMAIN plugin.bait_score DECIMAL;
     CREATE DOMAIN plugin.link_type VARCHAR(300);
     CREATE DOMAIN plugin.user_name_type VARCHAR(100);
     CREATE DOMAIN plugin.domain_name_type VARCHAR(100);
@@ -51,7 +52,7 @@ DO $$ BEGIN
     );
     CREATE TYPE plugin.link_score AS (
         link plugin.link_type,
-        score DECIMAL
+        score plugin.bait_score
     );
 EXCEPTION
     WHEN duplicate_object THEN null;

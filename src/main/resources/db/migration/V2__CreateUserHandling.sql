@@ -99,8 +99,8 @@ BEGIN
         ARRAY_AGG(privilege.name::text) AS privileges
     FROM plugin.users 
     INNER JOIN plugin.role USING (role_id)
-    LEFT JOIN plugin.user_privilege USING (user_id)
-    LEFT JOIN plugin.privilege USING (privilege_id)
+    INNER JOIN plugin.user_privilege USING (user_id)
+    INNER JOIN plugin.privilege USING (privilege_id)
     GROUP BY users.user_id, users.name, role.name;
 END;
 $$;
@@ -181,8 +181,8 @@ BEGIN
         users.cred_expired
     FROM plugin.users 
     INNER JOIN plugin.role USING (role_id)
-    LEFT JOIN plugin.user_privilege USING (user_id)
-    LEFT JOIN plugin.privilege USING (privilege_id)
+    INNER JOIN plugin.user_privilege USING (user_id)
+    INNER JOIN plugin.privilege USING (privilege_id)
     WHERE users.user_id = user_id_p OR 
     (users.name = name_p AND users.password = password_p) 
     OR users.name = name_p

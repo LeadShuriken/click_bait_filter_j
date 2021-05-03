@@ -7,8 +7,10 @@ import javax.validation.constraints.NotEmpty;
 import com.clickbait.plugin.annotations.UUIDA;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Privileges {
 

@@ -1,5 +1,6 @@
 package com.clickbait.plugin.services;
 
+import com.clickbait.plugin.annotations.SqlExceptionPass;
 import com.clickbait.plugin.dao.*;
 import com.clickbait.plugin.security.ApplicationUserPrivilege;
 import com.clickbait.plugin.security.ApplicationUserRole;
@@ -95,6 +96,7 @@ public class ApplicationDataService {
         return tabDataService.getUserTabs(userId);
     }
 
+    @SqlExceptionPass
     public UserTab getUserTab(UUID userId, int index) {
         return tabDataService.getUserTab(userId, index);
     }
@@ -107,8 +109,8 @@ public class ApplicationDataService {
         return clickDataService.getDomainClicks(userId, name);
     }
 
-    public UUID addClick(UUID userId, String domain, String link) {
-        return clickDataService.addClick(userId, domain, link);
+    public UUID addClick(UUID userId, String domain, String link, Float baitScore) {
+        return clickDataService.addClick(userId, domain, link, baitScore);
     }
 
     public int activateUser(UUID userId, Boolean enabled, Boolean accountExpired, Boolean accountLocked,

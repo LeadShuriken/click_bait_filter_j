@@ -25,10 +25,10 @@ public class ClickDataService {
                                 new Object[] { userId, name });
         }
 
-        UUID addClick(UUID userId, String domain, String link) {
-                return jdbcTemplate.queryForObject("SELECT plugin.add_click(?, ?, ?)",
+        UUID addClick(UUID userId, String domain, String link, Float score) {
+                return jdbcTemplate.queryForObject("SELECT plugin.add_click(?, ?, ?, ?::plugin.bait_score)",
                                 (resultSet, i) -> UUID.fromString(resultSet.getString("add_click")),
-                                new Object[] { userId, domain, link });
+                                new Object[] { userId, domain, link, score });
         }
 
         private RowMapper<UserClick> mapClickFromDb() {
@@ -38,7 +38,7 @@ public class ClickDataService {
                         String domain = resultSet.getString("domain");
                         String link = resultSet.getString("link");
                         LocalDate atTime = resultSet.getDate("at_time").toLocalDate();
-                        return new UserClick(userId, domain, link, atTime);
+                        return new UserClick(userId, domain, link, atTime, null);
                 };
         }
 }
