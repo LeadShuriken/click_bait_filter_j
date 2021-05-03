@@ -15,6 +15,14 @@ public class Link {
     @JsonProperty("score")
     private final Float score;
 
+    public String getName() {
+        return name;
+    }
+
+    public Float getScore() {
+        return score;
+    }
+
     public Link(String name, Float score) {
         this.name = name;
         this.score = score;

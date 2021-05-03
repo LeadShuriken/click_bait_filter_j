@@ -45,8 +45,8 @@ public class TabDataService {
                 return (resultSet, i) -> {
                         int tabId = resultSet.getInt("index");
                         String name = resultSet.getString("name");
-                        List<Link> links = Arrays.stream((Object[]) resultSet.getArray("links").getArray())
-                                        .map(Link::valueOf).collect(Collectors.toList());
+                        Map<String, Float> links = Arrays.stream((Object[]) resultSet.getArray("links").getArray())
+                                        .map(Link::valueOf).collect(Collectors.toMap(Link::getName, Link::getScore));
                         return new UserTab(tabId, name, links);
                 };
         }
