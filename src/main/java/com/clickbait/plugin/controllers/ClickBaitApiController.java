@@ -2,12 +2,11 @@ package com.clickbait.plugin.controllers;
 
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.validation.Valid;
 
@@ -30,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClickBaitApiController {
 
     @Autowired
-    private ApplicationDataService applicationDataService;
+    private ApplicationDataService dataService;
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('CLICKS_WRITE')")
     @PostMapping(value = "${api.clicks_register}")
@@ -48,39 +47,49 @@ public class ClickBaitApiController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
     @PostMapping(value = "${api.page_segmentation}")
-    public Map<String, Float> fetchPageSegmentation(@Valid @RequestBody UserTab tab) throws URISyntaxException {
-        AuthenticatedUser user = ((AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal());
+    public Map<String, Float> fetchPageSegmentation(@Valid @RequestBody UserTab requestTab) throws URISyntaxException {
+        UUID userId = ((AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getUserId();
 
-        UserTab domainTab = null;
-        String domain = tab.getName();
-        if (!Strings.isNullOrEmpty(domain)) {
-            domainTab = applicationDataService.getUserTab(user.getUserId(), tab.getTabId());
-            if (domainTab == null) {
-                domain = applicationDataService.extractHostname(domain);
-                applicationDataService.insertTab(user.getUserId(), domain, tab.getTabId());
-                domainTab = applicationDataService.getUserTab(user.getUserId(), tab.getTabId());
+        // Body bootstrap
+        final int tabId = requestTab.getTabId();
+        final Map<String, String[]> links = requestTab.getLinksData();
+        String domainName = requestTab.getName();
+        UserTab storedTab = null;
+
+        if (!Strings.isNullOrEmpty(domainName)) {
+            domainName = dataService.extractHostname(domainName);
+            storedTab = dataService.getUserTab(userId, tabId);
+            if (storedTab == null) {
+                // No such tab, register but remains empty
+                dataService.insertTab(userId, domainName, tabId);
             }
         } else {
-            domainTab = applicationDataService.getUserTab(user.getUserId(), tab.getTabId());
+            domainName = dataService.getUserTab(userId, tabId).getName();
         }
 
-        Map<String, Float> links = tab.getLinks();
-        Map<String, Float> currentLinks = domainTab.getLinks();
-        if (links != null) {
-            if (currentLinks != null) {
-                currentLinks = currentLinks.entrySet().stream().filter(x -> !links.containsKey(x.getKey()))
-                        .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
-            } else {
-                currentLinks = null;
-            }
+        final Map<String, Float> storedLinks = storedTab != null && storedTab.getLinks() != null ? storedTab.getLinks()
+                : new HashMap<String, Float>();
+        Map<String, Float> returnLinks = storedLinks;
 
-            if (currentLinks != null) {
+        if (links != null && !links.isEmpty()) {
+            final Map<String, String[]> newLinks = links.entrySet().stream()
+                    .filter(x -> !storedLinks.containsKey(x.getKey()))
+                    .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+
+            if (!newLinks.isEmpty()) {
+
+                // Tflow external Tomcat here
                 Random r = new Random();
-                currentLinks.entrySet().stream().map(x -> x.setValue(r.nextFloat()));
+                final Map<String, Float> scoredLinks = newLinks.entrySet().stream()
+                        .collect(Collectors.toMap(x -> x.getKey(), x -> r.nextFloat()));
+                dataService.createPageModel(domainName, scoredLinks);
+                //
+
+                returnLinks = Stream.concat(scoredLinks.entrySet().stream(), storedLinks.entrySet().stream())
+                        .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
             }
         }
-
-        return currentLinks;
+        return returnLinks;
     }
 }

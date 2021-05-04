@@ -2,14 +2,14 @@ CREATE TABLE IF NOT EXISTS plugin.link (
     link_id plugin.id_type PRIMARY KEY,
     domain_id plugin.id_type NOT NULL,
     link plugin.link_type UNIQUE NOT NULL,
-    count BIGINT CHECK (count >= 1) DEFAULT 1,
+    count BIGINT CHECK (count >= 0) DEFAULT 0,
     last_clicked TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (domain_id) REFERENCES plugin.domain (domain_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS plugin.link_predictions (
     link_id plugin.id_type PRIMARY KEY,
-    bScore plugin.bait_score DEFAULT NULL,
+    bScore plugin.bait_score DEFAULT 0.0 NOT NULL,
     bScoreUpdated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (link_id) REFERENCES plugin.link (link_id) ON DELETE CASCADE
 );
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS plugin.click (
     FOREIGN KEY (link_id) REFERENCES plugin.link (link_id) ON DELETE CASCADE
 );
 
-CREATE OR REPLACE FUNCTION plugin.add_click(
+CREATE OR REPLACE FUNCTION plugin.insert_click(
     user_id_p plugin.id_type,
     domain_p plugin.domain_name_type,
     link_p plugin.link_type,

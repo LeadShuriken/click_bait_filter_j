@@ -8,12 +8,10 @@ AS $$
 DECLARE 
     linkF plugin.link_type;
     domain_f plugin.id_type;
-
     ident plugin.id_type := plugin.id();
     iterator INTEGER := 0;
 BEGIN
     IF cardinality(bScores_p) = cardinality(links_p) THEN
-
         WITH returnD AS (
             INSERT INTO plugin.domain (domain_id, name) VALUES (ident, domain_p)
             ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name
@@ -31,9 +29,11 @@ BEGIN
                 ON CONFLICT (link) DO UPDATE SET link=EXCLUDED.link
                 RETURNING plugin.link.link_id
             )
-            INSERT INTO plugin.link_predictions ( link_id, bScore) 
-            VALUES ((SELECT link_id FROM returnL), bScores_p[iterator]) 
-            ON CONFLICT (link_id) DO UPDATE SET bScore=bScores_p[iterator];
+            SELECT COALESCE((SELECT link_id FROM returnL), ident) INTO ident;
+
+            INSERT INTO plugin.link_predictions ( link_id, bScore)
+            VALUES (ident, bScores_p[iterator]) ON CONFLICT (link_id)
+            DO UPDATE SET bScore = bScores_p[iterator];
         END LOOP;
     END IF;
 EXCEPTION 

@@ -10,7 +10,6 @@ import com.clickbait.plugin.annotations.UUIDA;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Strings;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -42,6 +41,14 @@ public class UserClick {
         this.domain = domain;
         this.link = link;
         this.atTime = atTime;
+    }
+
+    public UserClick(UUID userId, String link, LocalDate atTime) {
+        this.atTime = atTime;
+        this.userId = userId;
+        this.link = link;
+        this.domain = null;
+        this.score = null;
     }
 
     public UserClick(String link, Float score) {
@@ -82,10 +89,7 @@ public class UserClick {
 
     public static UserClick valueOf(Object a) {
         String[] b = a.toString().replaceAll(reg, "").split(",");
-        if (b.length == 2 && !Strings.isNullOrEmpty(b[0]) && !Strings.isNullOrEmpty(b[1])) {
-            return new UserClick(b[0], Float.valueOf(b[1]));
-        }
-        return null;
+        return new UserClick(b[0], Float.valueOf(b[1]));
     }
 
     @Override

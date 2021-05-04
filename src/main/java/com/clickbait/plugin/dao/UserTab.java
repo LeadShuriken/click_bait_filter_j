@@ -34,15 +34,11 @@ public class UserTab {
     @JsonProperty("links")
     private final Map<String, Float> links;
 
-    public UserTab(UUID userId, UUID domainId, int tabId, String name, Map<String, Float> links) {
-        this.domainId = domainId;
-        this.userId = userId;
-        this.links = links;
-        this.tabId = tabId;
-        this.name = name;
-    }
+    @JsonProperty("linksData")
+    private final Map<String, String[]> linksData;
 
     public UserTab(int tabId, String name, Map<String, Float> links) {
+        this.linksData = null;
         this.domainId = null;
         this.userId = null;
         this.links = links;
@@ -51,9 +47,10 @@ public class UserTab {
     }
 
     public UserTab() {
-        this.links = null;
-        this.userId = null;
+        this.linksData = null;
         this.domainId = null;
+        this.userId = null;
+        this.links = null;
         this.tabId = null;
         this.name = null;
     }
@@ -72,6 +69,10 @@ public class UserTab {
 
     public UUID getDomainId() {
         return domainId;
+    }
+
+    public Map<String, String[]> getLinksData() {
+        return linksData;
     }
 
     public String getName() {

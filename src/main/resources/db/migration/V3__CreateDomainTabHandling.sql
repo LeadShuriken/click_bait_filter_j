@@ -52,7 +52,8 @@ BEGIN
     RETURN QUERY
     SELECT
         tab.index, domain.name,
-        ARRAY_AGG((link.link, link_predictions.bScore)::plugin.link_score) AS links
+        ARRAY_AGG((link.link, link_predictions.bScore)::plugin.link_score) 
+        FILTER (WHERE link.link IS NOT NULL) AS links
     FROM plugin.tab AS tab 
     INNER JOIN plugin.domain USING (domain_id)
     LEFT JOIN plugin.link USING (domain_id)

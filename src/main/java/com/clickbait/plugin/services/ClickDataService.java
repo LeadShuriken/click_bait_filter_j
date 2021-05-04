@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class ClickDataService {
@@ -26,19 +28,31 @@ public class ClickDataService {
         }
 
         UUID addClick(UUID userId, String domain, String link, Float score) {
-                return jdbcTemplate.queryForObject("SELECT plugin.add_click(?, ?, ?, ?::plugin.bait_score)",
-                                (resultSet, i) -> UUID.fromString(resultSet.getString("add_click")),
+                return jdbcTemplate.queryForObject("SELECT plugin.insert_click(?, ?, ?, ?::plugin.bait_score)",
+                                (resultSet, i) -> UUID.fromString(resultSet.getString("insert_click")),
                                 new Object[] { userId, domain, link, score });
+        }
+
+        int createPageModel(String domain, Map<String, Float> links) {
+                String[] linkType = new String[links.size()];
+                Float[] baitScore = new Float[links.size()];
+                int count = 0;
+                for (Map.Entry<String, Float> entry : links.entrySet()) {
+                        linkType[count] = entry.getKey();
+                        baitScore[count++] = entry.getValue();
+                }
+                return jdbcTemplate.update(
+                                "CALL plugin.create_page_model(?, ?::plugin.link_type[], ?::plugin.bait_score[])",
+                                domain, linkType, baitScore);
         }
 
         private RowMapper<UserClick> mapClickFromDb() {
                 return (resultSet, i) -> {
                         String userIdStr = resultSet.getString("user_id");
                         UUID userId = UUID.fromString(userIdStr);
-                        String domain = resultSet.getString("domain");
                         String link = resultSet.getString("link");
                         LocalDate atTime = resultSet.getDate("at_time").toLocalDate();
-                        return new UserClick(userId, domain, link, atTime, null);
+                        return new UserClick(userId, link, atTime);
                 };
         }
 }

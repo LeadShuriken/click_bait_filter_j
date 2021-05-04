@@ -6,11 +6,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -47,11 +46,14 @@ public class TabDataService {
                 return (resultSet, i) -> {
                         int tabId = resultSet.getInt("index");
                         String name = resultSet.getString("name");
-                        Map<String, Float> links = Arrays.stream((Object[]) resultSet.getArray("links").getArray())
-                                        .map(UserClick::valueOf).filter(Objects::nonNull)
-                                        .collect(Collectors.toMap(UserClick::getLink, UserClick::getScore));
+                        Array linksData = resultSet.getArray("links");
+                        Map<String, Float> links = null;
+                        if (linksData != null)
+                                links = Arrays.stream((Object[]) linksData.getArray())
+                                                .map(UserClick::valueOf)
+                                                .collect(Collectors.toMap(UserClick::getLink, UserClick::getScore));
 
-                        return new UserTab(tabId, name, links.isEmpty() ? null : links);
+                        return new UserTab(tabId, name, links);
                 };
         }
 

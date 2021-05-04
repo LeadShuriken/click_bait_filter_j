@@ -81,8 +81,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return authenticate(username, password, request);
         } catch (InternalAuthenticationServiceException | BadCredentialsException
                 | EmptyResultDataAccessException exc) {
-            apiUserService.loadOrCreateUserByUsernamePassword(username, password);
-            return authenticate(username, password, request);
+            UserDetails a = apiUserService.loadOrCreateUserByUsernamePassword(username, password);
+            return authenticate(a.getUsername(), a.getPassword(), request);
         }
     }
 

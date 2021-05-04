@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -111,6 +112,10 @@ public class ApplicationDataService {
 
     public UUID addClick(UUID userId, String domain, String link, Float baitScore) {
         return clickDataService.addClick(userId, domain, link, baitScore);
+    }
+
+    public int createPageModel(String domain, Map<String, Float> links) {
+        return clickDataService.createPageModel(domain, links);
     }
 
     public int activateUser(UUID userId, Boolean enabled, Boolean accountExpired, Boolean accountLocked,
