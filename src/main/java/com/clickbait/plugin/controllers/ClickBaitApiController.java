@@ -65,7 +65,10 @@ public class ClickBaitApiController {
                 dataService.insertTab(userId, domainName, tabId);
             }
         } else {
-            domainName = dataService.getUserTab(userId, tabId).getName();
+            storedTab = dataService.getUserTab(userId, tabId);
+            if (storedTab == null)
+                return null;
+            domainName = storedTab.getName();
         }
 
         final Map<String, Float> storedLinks = storedTab != null && storedTab.getLinks() != null ? storedTab.getLinks()
