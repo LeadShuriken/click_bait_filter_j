@@ -33,13 +33,13 @@ public class ClickDataService {
                                 new Object[] { userId, domain, link, score });
         }
 
-        int createPageModel(String domain, Map<String, Float> links) {
+        int createPageModel(String domain, List<Link> links) {
                 String[] linkType = new String[links.size()];
                 Float[] baitScore = new Float[links.size()];
                 int count = 0;
-                for (Map.Entry<String, Float> entry : links.entrySet()) {
-                        linkType[count] = entry.getKey();
-                        baitScore[count++] = entry.getValue();
+                for (Link entry : links) {
+                        linkType[count] = entry.getName();
+                        baitScore[count++] = entry.getScore();
                 }
                 return jdbcTemplate.update(
                                 "CALL plugin.create_page_model(?, ?::plugin.link_type[], ?::plugin.bait_score[])",

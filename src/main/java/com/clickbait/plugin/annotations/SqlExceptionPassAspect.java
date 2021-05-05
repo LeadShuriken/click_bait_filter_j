@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 public class SqlExceptionPassAspect {
 
     @Around("@annotation(SqlExceptionPass)")
-    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object sqlExceptionPass(ProceedingJoinPoint pjp) throws Throwable {
         Object proceed = null;
 
         try {
-            proceed = joinPoint.proceed();
+            proceed = pjp.proceed();
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

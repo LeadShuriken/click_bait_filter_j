@@ -1,8 +1,8 @@
 package com.clickbait.plugin.controllers;
 
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -10,15 +10,14 @@ import java.util.stream.Stream;
 
 import javax.validation.Valid;
 
+import com.clickbait.plugin.dao.Link;
 import com.clickbait.plugin.dao.UserClick;
 import com.clickbait.plugin.dao.UserTab;
 import com.clickbait.plugin.security.AuthenticatedUser;
 import com.clickbait.plugin.services.ApplicationDataService;
-import com.google.common.base.Strings;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,66 +32,62 @@ public class ClickBaitApiController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('CLICKS_WRITE')")
     @PostMapping(value = "${api.clicks_register}")
-    public String registerLink(@Valid @RequestBody UserClick click) {
-        // 1. Get domain from body.domain by extractiong hostname
-        // 2. Fetch all linkst for domain
-        // 3. If by some freak accident there is no such domain aka land second
-        // Register with name, link score (tflow)
-        // 4. Else register click score (tflow) or increment and rescore
-        // 5. Insert in clicks
-        AuthenticatedUser user = ((AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal());
-        return "";
+    public void registerLink(@Valid @RequestBody UserClick click, @AuthenticationPrincipal AuthenticatedUser user) {
+
+        String domainName = dataService.extractHostname(click.getDomain());
+        // Tflow external Tomcat here
+        dataService.addClick(user.getUserId(), domainName, click.getLink(), 0.01f);
+        //
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
+    @PostMapping(value = "${api.page_tab_segmentation}")
+    public List<Link> pageTabSegmentation(@Valid @RequestBody UserTab requestTab,
+            @AuthenticationPrincipal AuthenticatedUser user) {
+        UserTab storedTab = dataService.getUserTab(user.getUserId(), requestTab.getTabId());
+        if (storedTab == null)
+            return new ArrayList<Link>();
+
+        return storedTab.getLinks() != null ? storedTab.getLinks() : new ArrayList<Link>();
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
     @PostMapping(value = "${api.page_segmentation}")
-    public Map<String, Float> fetchPageSegmentation(@Valid @RequestBody UserTab requestTab) throws URISyntaxException {
-        UUID userId = ((AuthenticatedUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                .getUserId();
+    public List<Link> fetchPageSegmentation(@Valid @RequestBody UserTab requestTab,
+            @AuthenticationPrincipal AuthenticatedUser user) {
+        UUID userId = user.getUserId();
 
-        // Body bootstrap
+        List<Link> returnLinks = new ArrayList<Link>();
         final int tabId = requestTab.getTabId();
-        final Map<String, String[]> links = requestTab.getLinksData();
-        String domainName = requestTab.getName();
-        UserTab storedTab = null;
+        final List<Link> links = requestTab.getLinks();
+        String domainName = dataService.extractHostname(requestTab.getName());
 
-        if (!Strings.isNullOrEmpty(domainName)) {
-            domainName = dataService.extractHostname(domainName);
-            storedTab = dataService.getUserTab(userId, tabId);
-            if (storedTab == null) {
-                // No such tab, register but remains empty
-                dataService.insertTab(userId, domainName, tabId);
-            }
-        } else {
-            storedTab = dataService.getUserTab(userId, tabId);
-            if (storedTab == null)
-                return null;
-            domainName = storedTab.getName();
-        }
+        UserTab storedTab = dataService.getUserTab(userId, tabId);
+        if (storedTab == null)
+            dataService.insertTab(userId, domainName, tabId);
 
-        final Map<String, Float> storedLinks = storedTab != null && storedTab.getLinks() != null ? storedTab.getLinks()
-                : new HashMap<String, Float>();
-        Map<String, Float> returnLinks = storedLinks;
+        final List<Link> storedLinks = storedTab.getLinks() != null ? storedTab.getLinks() : new ArrayList<Link>();
+        returnLinks = storedLinks;
 
         if (links != null && !links.isEmpty()) {
-            final Map<String, String[]> newLinks = links.entrySet().stream()
-                    .filter(x -> !storedLinks.containsKey(x.getKey()))
-                    .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+            final List<Link> newLinks = links.stream()
+                    .filter(x -> !storedLinks.stream().anyMatch(u -> u.getName().equals(x.getName())))
+                    .collect(Collectors.toList());
 
             if (!newLinks.isEmpty()) {
 
                 // Tflow external Tomcat here
                 Random r = new Random();
-                final Map<String, Float> scoredLinks = newLinks.entrySet().stream()
-                        .collect(Collectors.toMap(x -> x.getKey(), x -> r.nextFloat()));
+                final List<Link> scoredLinks = newLinks.stream().map(a -> new Link(a.getName(), r.nextFloat()))
+                        .collect(Collectors.toList());
                 dataService.createPageModel(domainName, scoredLinks);
                 //
 
-                returnLinks = Stream.concat(scoredLinks.entrySet().stream(), storedLinks.entrySet().stream())
-                        .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+                returnLinks = Stream.concat(scoredLinks.stream(), storedLinks.stream())
+                        .sorted(Comparator.comparing(Link::getScore)).collect(Collectors.toList());
             }
         }
+
         return returnLinks;
     }
 }

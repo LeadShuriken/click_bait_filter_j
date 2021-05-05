@@ -1,6 +1,6 @@
 package com.clickbait.plugin.dao;
 
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 import javax.validation.constraints.Min;
@@ -32,13 +32,9 @@ public class UserTab {
     private final String name;
 
     @JsonProperty("links")
-    private final Map<String, Float> links;
+    private final List<Link> links;
 
-    @JsonProperty("linksData")
-    private final Map<String, String[]> linksData;
-
-    public UserTab(int tabId, String name, Map<String, Float> links) {
-        this.linksData = null;
+    public UserTab(int tabId, String name, List<Link> links) {
         this.domainId = null;
         this.userId = null;
         this.links = links;
@@ -47,7 +43,6 @@ public class UserTab {
     }
 
     public UserTab() {
-        this.linksData = null;
         this.domainId = null;
         this.userId = null;
         this.links = null;
@@ -63,16 +58,12 @@ public class UserTab {
         return tabId;
     }
 
-    public Map<String, Float> getLinks() {
+    public List<Link> getLinks() {
         return links;
     }
 
     public UUID getDomainId() {
         return domainId;
-    }
-
-    public Map<String, String[]> getLinksData() {
-        return linksData;
     }
 
     public String getName() {

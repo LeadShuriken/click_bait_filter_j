@@ -30,8 +30,14 @@ public class ApplicationDataService {
         this.tabDataService = tabDataService;
     }
 
-    public String extractHostname(String url) throws URISyntaxException {
-        String domain = new URI(url).getHost();
+    public String extractHostname(String url) {
+        String domain = "";
+        try {
+            domain = new URI(url).getHost();
+        } catch (URISyntaxException e) {
+            return null;
+        }
+
         return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
 
@@ -114,7 +120,7 @@ public class ApplicationDataService {
         return clickDataService.addClick(userId, domain, link, baitScore);
     }
 
-    public int createPageModel(String domain, Map<String, Float> links) {
+    public int createPageModel(String domain, List<Link> links) {
         return clickDataService.createPageModel(domain, links);
     }
 

@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserClick {
-    private final static String reg = "\\)|\\(";
 
     @UUIDA
     @JsonProperty("userId")
@@ -85,11 +84,6 @@ public class UserClick {
 
     public LocalDate getAtTime() {
         return atTime;
-    }
-
-    public static UserClick valueOf(Object a) {
-        String[] b = a.toString().replaceAll(reg, "").split(",");
-        return new UserClick(b[0], Float.valueOf(b[1]));
     }
 
     @Override
