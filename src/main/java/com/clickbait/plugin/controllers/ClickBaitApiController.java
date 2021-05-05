@@ -16,11 +16,14 @@ import com.clickbait.plugin.dao.UserTab;
 import com.clickbait.plugin.security.AuthenticatedUser;
 import com.clickbait.plugin.services.ApplicationDataService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,6 +35,7 @@ public class ClickBaitApiController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('CLICKS_WRITE')")
     @PostMapping(value = "${api.clicks_register}")
+    @ResponseStatus(value = HttpStatus.OK)
     public void registerLink(@Valid @RequestBody UserClick click, @AuthenticationPrincipal AuthenticatedUser user) {
 
         String domainName = dataService.extractHostname(click.getDomain());
@@ -42,7 +46,7 @@ public class ClickBaitApiController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
     @PostMapping(value = "${api.page_tab_segmentation}")
-    public List<Link> pageTabSegmentation(@Valid @RequestBody UserTab requestTab,
+    public @ResponseBody List<Link> pageTabSegmentation(@Valid @RequestBody UserTab requestTab,
             @AuthenticationPrincipal AuthenticatedUser user) {
         UserTab storedTab = dataService.getUserTab(user.getUserId(), requestTab.getTabId());
         if (storedTab == null)
@@ -53,7 +57,7 @@ public class ClickBaitApiController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
     @PostMapping(value = "${api.page_segmentation}")
-    public List<Link> fetchPageSegmentation(@Valid @RequestBody UserTab requestTab,
+    public @ResponseBody List<Link> fetchPageSegmentation(@Valid @RequestBody UserTab requestTab,
             @AuthenticationPrincipal AuthenticatedUser user) {
         UUID userId = user.getUserId();
 
