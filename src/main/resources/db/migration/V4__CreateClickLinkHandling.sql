@@ -35,8 +35,8 @@ AS $$
     DECLARE ident plugin.id_type := plugin.id();
 BEGIN
     WITH returnR AS (
-        INSERT INTO plugin.link ( link_id, link, domain_id ) VALUES (ident, link_p, 
-            (SELECT domain_id FROM plugin.domain WHERE name = domain_p))
+        INSERT INTO plugin.link ( link_id, link, domain_id, count ) VALUES (ident, link_p, 
+            (SELECT domain_id FROM plugin.domain WHERE name = domain_p), 1 )
         ON CONFLICT (link) DO UPDATE SET
         count = plugin.link.count + 1
         RETURNING plugin.link.link_id
