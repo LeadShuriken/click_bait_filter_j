@@ -8,9 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class ClickDataService {
@@ -52,7 +50,7 @@ public class ClickDataService {
                         UUID userId = UUID.fromString(userIdStr);
                         String link = resultSet.getString("link");
                         LocalDate atTime = resultSet.getDate("at_time").toLocalDate();
-                        return new UserClick(userId, link, atTime);
+                        return new UserClick(userId, new Link(link), atTime);
                 };
         }
 }

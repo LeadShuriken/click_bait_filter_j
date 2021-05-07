@@ -8,15 +8,21 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.clickbait.plugin.dao.Link;
-import com.clickbait.plugin.dao.UserClick;
 import com.clickbait.plugin.dao.UserTab;
+import com.clickbait.plugin.dao.UserClick;
+import org.springframework.http.HttpStatus;
+
 import com.clickbait.plugin.security.AuthenticatedUser;
 import com.clickbait.plugin.services.ApplicationDataService;
+import com.clickbait.plugin.thirdPartyRest.TFlowRestService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,15 +39,17 @@ public class ClickBaitApiController {
     @Autowired
     private ApplicationDataService dataService;
 
+    @Autowired
+    private TFlowRestService tflowRest;
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('CLICKS_WRITE')")
     @PostMapping(value = "${api.clicks_register}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void registerLink(@Valid @RequestBody UserClick click, @AuthenticationPrincipal AuthenticatedUser user) {
-
-        String domainName = dataService.extractHostname(click.getDomain());
-        // Tflow external Tomcat here
-        dataService.addClick(user.getUserId(), domainName, click.getLink(), 0.01f);
-        //
+    public void registerLink(@Valid @RequestBody UserClick click, @AuthenticationPrincipal AuthenticatedUser user,
+            HttpServletRequest request) {
+        final String domainName = dataService.extractHostname(click.getDomain());
+        final Link scored = tflowRest.getScore(request, click.getLink());
+        dataService.addClick(user.getUserId(), domainName, scored.getName(), scored.getScore());
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
@@ -58,7 +66,7 @@ public class ClickBaitApiController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER') and hasAuthority('DOMAINS_READ')")
     @PostMapping(value = "${api.page_segmentation}")
     public @ResponseBody List<Link> fetchPageSegmentation(@Valid @RequestBody UserTab requestTab,
-            @AuthenticationPrincipal AuthenticatedUser user) {
+            @AuthenticationPrincipal AuthenticatedUser user, HttpServletRequest request) {
         UUID userId = user.getUserId();
 
         List<Link> returnLinks = new ArrayList<Link>();
@@ -79,13 +87,8 @@ public class ClickBaitApiController {
                     .collect(Collectors.toList());
 
             if (!newLinks.isEmpty()) {
-
-                // Tflow external Tomcat here
-                Random r = new Random();
-                final List<Link> scoredLinks = newLinks.stream().map(a -> new Link(a.getName(), r.nextFloat()))
-                        .collect(Collectors.toList());
+                final List<Link> scoredLinks = tflowRest.getScores(request, new UserTab(newLinks));
                 dataService.createPageModel(domainName, scoredLinks);
-                //
 
                 returnLinks = Stream.concat(scoredLinks.stream(), storedLinks.stream())
                         .sorted(Comparator.comparing(Link::getScore)).collect(Collectors.toList());

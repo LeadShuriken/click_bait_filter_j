@@ -23,35 +23,28 @@ public class UserClick {
     @JsonProperty("domain")
     private final String domain;
 
-    @SQLInjectionSafe
     @JsonProperty("link")
-    private final String link;
+    private final Link link;
 
     @Past
     @JsonProperty("atTime")
     private final LocalDate atTime;
 
-    @JsonProperty("score")
-    private final Float score;
-
-    public UserClick(UUID userId, String domain, String link, LocalDate atTime, Float score) {
+    public UserClick(UUID userId, String domain, Link link, LocalDate atTime) {
         this.userId = userId;
-        this.score = score;
         this.domain = domain;
-        this.link = link;
         this.atTime = atTime;
+        this.link = link;
     }
 
-    public UserClick(UUID userId, String link, LocalDate atTime) {
+    public UserClick(UUID userId, Link link, LocalDate atTime) {
         this.atTime = atTime;
         this.userId = userId;
         this.link = link;
         this.domain = null;
-        this.score = null;
     }
 
-    public UserClick(String link, Float score) {
-        this.score = score;
+    public UserClick(Link link) {
         this.link = link;
         this.userId = null;
         this.domain = null;
@@ -59,15 +52,10 @@ public class UserClick {
     }
 
     public UserClick() {
-        this.score = null;
         this.userId = null;
         this.domain = null;
         this.link = null;
         this.atTime = null;
-    }
-
-    public Float getScore() {
-        return score;
     }
 
     public UUID getUserId() {
@@ -78,7 +66,7 @@ public class UserClick {
         return domain;
     }
 
-    public String getLink() {
+    public Link getLink() {
         return link;
     }
 

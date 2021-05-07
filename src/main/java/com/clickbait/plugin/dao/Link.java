@@ -30,6 +30,11 @@ public class Link {
         this.score = score;
     }
 
+    public Link(String name) {
+        this.name = name;
+        this.score = null;
+    }
+
     public Link() {
         this.score = null;
         this.name = null;

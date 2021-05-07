@@ -42,6 +42,14 @@ public class UserTab {
         this.name = name;
     }
 
+    public UserTab(List<Link> links) {
+        this.domainId = null;
+        this.userId = null;
+        this.links = links;
+        this.tabId = null;
+        this.name = null;
+    }
+
     public UserTab() {
         this.domainId = null;
         this.userId = null;

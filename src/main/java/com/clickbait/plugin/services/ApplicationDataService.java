@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,12 +31,15 @@ public class ApplicationDataService {
 
     public String extractHostname(String url) {
         String domain = "";
-        try {
-            domain = new URI(url).getHost();
-        } catch (URISyntaxException e) {
-            return null;
+        if (url.startsWith("http") || url.startsWith("www.")) {
+            try {
+                domain = new URI(url).getHost();
+            } catch (Exception e) {
+                throw new RuntimeException("Wrong domain");
+            }
+        } else {
+            throw new RuntimeException("Wrong domain");
         }
-
         return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
 

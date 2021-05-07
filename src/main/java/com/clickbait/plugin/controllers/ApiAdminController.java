@@ -43,7 +43,8 @@ public class ApiAdminController {
     @PostMapping(value = "${api.insert_click}")
     @ResponseStatus(value = HttpStatus.OK)
     public void insertClick(@Valid @RequestBody UserClick click) {
-        applicationDataService.addClick(click.getUserId(), click.getDomain(), click.getLink(), click.getScore());
+        applicationDataService.addClick(click.getUserId(), click.getDomain(), click.getLink().getName(),
+                click.getLink().getScore());
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') and hasAuthority('DOMAINS_READ')")
