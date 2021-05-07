@@ -8,7 +8,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER set_last_clicked_trigger 
+CREATE TRIGGER set_last_link_predictions_updated
 AFTER UPDATE OF bScore ON plugin.link_predictions
 FOR EACH ROW 
 EXECUTE PROCEDURE plugin.link_predictions_updated();
