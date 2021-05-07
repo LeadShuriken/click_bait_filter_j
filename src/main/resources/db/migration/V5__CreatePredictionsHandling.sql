@@ -27,19 +27,3 @@ CREATE TRIGGER set_last_clicked_trigger
 AFTER UPDATE OF count ON plugin.link
 FOR EACH ROW 
 EXECUTE PROCEDURE plugin.link_last_clicked();
-
-CREATE OR REPLACE PROCEDURE plugin.update_link_predictions(
-    link_p plugin.link_type,
-    bScore_p plugin.bait_score
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    UPDATE plugin.link_predictions SET bScore = bScore_p
-    FROM plugin.link WHERE link_predictions.link_id = link.link_id;
-EXCEPTION 
-  WHEN OTHERS THEN 
-  ROLLBACK;
-COMMIT;
-END;
-$$;
