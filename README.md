@@ -74,6 +74,10 @@ This application is an **GRADLE APPLICATION USING THE GRADLE WRAPPER**;
 
  - Tests and Docs
  - All stored procedures
+
+### DATABASE
+
+![alt text](https://github.com/LeadShuriken/click_bait_filter_j/blob/master/database.png?raw=true)
  
   [JAVA11]: <https://www.oracle.com/java/technologies/javase-jdk11-downloads.html>
   [SPRING]: <https://spring.io>
