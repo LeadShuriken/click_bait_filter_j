@@ -75,7 +75,7 @@ This application is an **GRADLE APPLICATION USING THE GRADLE WRAPPER**;
  - Tests and Docs
  - All stored procedures
 
-### DATABASE
+## DATABASE
 
 ![alt text](https://github.com/LeadShuriken/click_bait_filter_j/blob/master/database.png?raw=true)
  
