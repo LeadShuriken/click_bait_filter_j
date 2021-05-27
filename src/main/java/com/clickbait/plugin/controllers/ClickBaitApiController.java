@@ -21,7 +21,6 @@ import com.clickbait.plugin.services.ApplicationDataService;
 import com.clickbait.plugin.thirdPartyRest.TFlowRestService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -75,11 +74,16 @@ public class ClickBaitApiController {
         String domainName = dataService.extractHostname(requestTab.getName());
 
         UserTab storedTab = dataService.getUserTab(userId, tabId);
-        if (storedTab == null)
-            dataService.insertTab(userId, domainName, tabId);
 
-        final List<Link> storedLinks = storedTab.getLinks() != null ? storedTab.getLinks() : new ArrayList<Link>();
-        returnLinks = storedLinks;
+        List<Link> tempLinks = new ArrayList<Link>();
+        if (storedTab == null) {
+            dataService.insertTab(userId, domainName, tabId);
+        } else {
+            tempLinks = storedTab.getLinks() != null ? storedTab.getLinks() : new ArrayList<Link>();
+        }
+
+        final List<Link> storedLinks = tempLinks;
+        returnLinks = tempLinks;
 
         if (links != null && !links.isEmpty()) {
             final List<Link> newLinks = links.stream()
