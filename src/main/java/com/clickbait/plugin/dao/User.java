@@ -50,27 +50,15 @@ public class User {
     private final Boolean credExpired;
 
     public User() {
-        this.userId = null;
-        this.name = null;
-        this.password = null;
-        this.privileges = null;
-        this.role = null;
-        this.enabled = null;
-        this.accountExpired = null;
-        this.accountLocked = null;
-        this.credExpired = null;
+        this(null, null, null, null, null, null, null, null, null);
     }
 
     public User(String name, String password) {
-        this.userId = null;
-        this.name = name;
-        this.password = password;
-        this.privileges = null;
-        this.role = null;
-        this.enabled = null;
-        this.accountExpired = null;
-        this.accountLocked = null;
-        this.credExpired = null;
+        this(null, name, password, null, null, null, null, null, null);
+    }
+
+    public User(UUID userId, String name, ApplicationUserRole role, List<ApplicationUserPrivilege> privileges) {
+        this(userId, name, null, role, privileges, null, null, null, null);
     }
 
     public User(UUID userId, String name, String password, ApplicationUserRole role,
@@ -85,18 +73,6 @@ public class User {
         this.accountExpired = accountExpired;
         this.accountLocked = accountLocked;
         this.credExpired = credExpired;
-    }
-
-    public User(UUID userId, String name, ApplicationUserRole role, List<ApplicationUserPrivilege> privileges) {
-        this.userId = userId;
-        this.name = name;
-        this.privileges = privileges;
-        this.role = role;
-        this.enabled = null;
-        this.password = null;
-        this.accountExpired = null;
-        this.accountLocked = null;
-        this.credExpired = null;
     }
 
     public Boolean getEnabled() {
