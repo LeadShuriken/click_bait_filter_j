@@ -38,24 +38,15 @@ public class UserClick {
     }
 
     public UserClick(UUID userId, Link link, LocalDate atTime) {
-        this.atTime = atTime;
-        this.userId = userId;
-        this.link = link;
-        this.domain = null;
+        this(userId, null, link, atTime);
     }
 
     public UserClick(Link link) {
-        this.link = link;
-        this.userId = null;
-        this.domain = null;
-        this.atTime = null;
+        this(null, null, link, null);
     }
 
     public UserClick() {
-        this.userId = null;
-        this.domain = null;
-        this.link = null;
-        this.atTime = null;
+        this(null, null, null, null);
     }
 
     public UUID getUserId() {
