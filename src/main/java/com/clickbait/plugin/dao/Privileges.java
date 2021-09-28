@@ -28,8 +28,7 @@ public class Privileges {
     }
 
     public Privileges() {
-        this.userId = null;
-        this.privileges = null;
+        this(null, null);
     }
 
     public List<ApplicationUserPrivilege> getPrivileges() {
