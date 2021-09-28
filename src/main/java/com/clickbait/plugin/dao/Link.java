@@ -31,13 +31,11 @@ public class Link {
     }
 
     public Link(String name) {
-        this.name = name;
-        this.score = null;
+        this(name, null);
     }
 
     public Link() {
-        this.score = null;
-        this.name = null;
+        this(null, null);
     }
 
     public static Link valueOf(Object a) {
