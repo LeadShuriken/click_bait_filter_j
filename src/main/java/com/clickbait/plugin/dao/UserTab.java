@@ -19,14 +19,6 @@ public class UserTab {
     @JsonProperty("tabId")
     private final Integer tabId;
 
-    @UUIDA
-    @JsonProperty("domainId")
-    private final UUID domainId;
-
-    @UUIDA
-    @JsonProperty("userId")
-    private final UUID userId;
-
     @SQLInjectionSafe
     @JsonProperty("name")
     private final String name;
@@ -35,31 +27,17 @@ public class UserTab {
     private final List<Link> links;
 
     public UserTab(int tabId, String name, List<Link> links) {
-        this.domainId = null;
-        this.userId = null;
         this.links = links;
         this.tabId = tabId;
         this.name = name;
     }
 
     public UserTab(List<Link> links) {
-        this.domainId = null;
-        this.userId = null;
-        this.links = links;
-        this.tabId = null;
-        this.name = null;
+        this(links, null, null);
     }
 
     public UserTab() {
-        this.domainId = null;
-        this.userId = null;
-        this.links = null;
-        this.tabId = null;
-        this.name = null;
-    }
-
-    public UUID getUserId() {
-        return userId;
+        this(null, null, null);
     }
 
     public Integer getTabId() {
@@ -68,10 +46,6 @@ public class UserTab {
 
     public List<Link> getLinks() {
         return links;
-    }
-
-    public UUID getDomainId() {
-        return domainId;
     }
 
     public String getName() {
